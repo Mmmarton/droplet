@@ -6,6 +6,6 @@ describe('Core', () => {
   });
   it('should have a valid version', () => {
     expect(context.droplet.version).toBeDefined();
-    expect(context.droplet.version).toMatch('^([0-9]+\.?)+$');
+    expect(context.droplet.version).toMatch('^([0-9]+.?)+$');
   });
 });

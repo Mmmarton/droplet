@@ -1,5 +1,4 @@
 (function(global) {
-  console.log(global);
   var droplet = {
     version: '0.0.1'
   };
@@ -10,5 +9,3 @@
     global.droplet = droplet;
   }
 })(typeof window === 'undefined' ? this : window);
-
-module.exports = typeof window === 'undefined' ? this : window;
