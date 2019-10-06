@@ -1,4 +1,4 @@
-export function find(element, nth = 0) {
+function find(element, nth = 0) {
   function convertToViewElement(htmlElement) {
     htmlElement.setContent = content => {
       htmlElement.innerHTML = content;
@@ -13,3 +13,5 @@ export function find(element, nth = 0) {
       : null
     : null;
 }
+
+export { find };
