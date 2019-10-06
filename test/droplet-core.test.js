@@ -1,9 +1,11 @@
-const core = require('../app/js/droplet-core');
+const context = require('../app/js/droplet-core');
 
-describe('Core tests', () => {
-  it('it negates the boolean value', () => {
-    let boolean = false;
-    const result = core.negate(boolean);
-    expect(result).toBe(true);
+describe('Core', () => {
+  it('should be defined', () => {
+    expect(context.droplet).toBeDefined();
+  });
+  it('should have a valid version', () => {
+    expect(context.droplet.version).toBeDefined();
+    expect(context.droplet.version).toMatch('^([0-9]+\.?)+$');
   });
 });

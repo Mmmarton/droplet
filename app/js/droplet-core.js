@@ -1,5 +1,14 @@
-function negate(boolean) {
-  return !boolean;
-}
+(function(global) {
+  console.log(global);
+  var droplet = {
+    version: '0.0.1'
+  };
 
-module.exports = { negate };
+  if (global.droplet) {
+    throw new Error('The library was already imported.');
+  } else {
+    global.droplet = droplet;
+  }
+})(typeof window === 'undefined' ? this : window);
+
+module.exports = typeof window === 'undefined' ? this : window;
