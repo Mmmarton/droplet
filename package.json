@@ -1,0 +1,29 @@
+{
+  "name": "droplet",
+  "version": "1.0.0",
+  "description": "JS framework",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^0.11.1",
+    "jasmine": "^3.5.0",
+    "node-static": "^0.7.11"
+  },
+  "scripts": {
+    "test": "jasmine --config=test/jasmine.json",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NuttyYokel/droplet.git"
+  },
+  "author": "Marton Cserei",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/NuttyYokel/droplet/issues"
+  },
+  "homepage": "https://github.com/NuttyYokel/droplet#readme"
+}
