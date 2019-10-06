@@ -8,12 +8,13 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "chai": "^4.2.0",
     "http-server": "^0.11.1",
-    "jasmine": "^3.5.0",
+    "mocha": "^6.2.1",
     "node-static": "^0.7.11"
   },
   "scripts": {
-    "test": "jasmine --config=test/jasmine.json",
+    "test": "./node_modules/.bin/mocha",
     "start": "node server.js"
   },
   "repository": {
