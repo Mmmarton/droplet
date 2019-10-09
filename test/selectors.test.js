@@ -1,6 +1,6 @@
-const expect = require('chai').expect;
-const JSDOM = require('jsdom').JSDOM;
+import { expect } from 'chai';
 import { find } from '../app/droplet/selectors';
+const JSDOM = require('jsdom').JSDOM;
 
 describe('selectors', () => {
   describe('find', () => {
