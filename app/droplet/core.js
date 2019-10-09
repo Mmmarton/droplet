@@ -1,9 +1,9 @@
-const droplet = (function() {
+const droplet = (function(global) {
   var droplet = {
     version: '0.0.1'
   };
-
+  global.droplet = droplet;
   return droplet;
-})();
+})(typeof window === 'undefined' ? global : window);
 
-module.exports = droplet;
+export default droplet;
