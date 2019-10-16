@@ -1,4 +1,4 @@
-const body = document.querySelectorAll('body');
+const body = document.querySelectorAll('.first');
 const bodyElements = buildTree(body[0]);
 
 console.log(body[0].children);
