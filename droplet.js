@@ -1,13 +1,8 @@
-const body = document.querySelectorAll('.first');
+const body = document.querySelectorAll('body');
 const bodyElements = buildTree(body[0]);
 
-console.log(body[0].parentElement.childNodes);
-console.log(body[0].children);
-console.log(body[0].childNodes);
-console.log(bodyElements);
-
-const secondBody = document.querySelectorAll('.second');
-renderIntoElement(secondBody[0], bodyElements);
+// const secondBody = document.querySelectorAll('.second');
+renderIntoElement(body[0], bodyElements);
 
 function buildTree(DOMnode) {
   const node = {
