@@ -1,11 +1,25 @@
 const componentsList = {};
 
+const handler = {
+  set: (obj, prop, value) => {
+    console.log({ prev: obj[prop], curr: value });
+    obj[prop] = value;
+    return true;
+  },
+  apply: (target, thisArg, argumentsList) => {
+    console.log('asd');
+    return thisArg[target].apply(this, argumentList);
+  }
+};
+
 export function registerComponent(component, tag) {
   componentsList[tag] = component;
 
-  const a = new componentsList['carrot']();
+  const a = new Proxy(new componentsList['carrot'](), handler);
   a.update();
-  console.log(a.field);
+  a.update();
+  a.field = 'bumm';
+  a.array.push('mik');
 }
 export function buildTree(DOMnode) {
   const node = {
@@ -72,6 +86,7 @@ renderIntoElement(body[0], bodyElements);
 export class Carrot {
   componentName = 'carrot';
   field = 'Something';
+  array = ['pam'];
 
   update() {
     this.field += 'd';
