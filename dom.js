@@ -1,10 +1,4 @@
-const body = document.querySelectorAll('body');
-const bodyElements = buildTree(body[0]);
-
-// const secondBody = document.querySelectorAll('.second');
-renderIntoElement(body[0], bodyElements);
-
-function buildTree(DOMnode) {
+export function buildTree(DOMnode) {
   const node = {
     type: DOMnode.nodeType,
     name: DOMnode.nodeName,
@@ -19,7 +13,7 @@ function buildTree(DOMnode) {
   return node;
 }
 
-function renderIntoElement(DOMelement, tree) {
+export function renderIntoElement(DOMelement, tree) {
   const element = buildDOMFromNode(tree);
   DOMelement.parentNode.insertBefore(element, DOMelement);
   DOMelement.parentNode.removeChild(DOMelement);
