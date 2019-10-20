@@ -1,13 +1,9 @@
 import { registerComponent } from '..combined/components';
 
 export class Carrot {
-  componentName = 'carrot';
-  field = 'Something';
-  array = ['pam'];
-
-  update() {
-    this.field += 'd';
-  }
+  template = `
+  <span style="color: orange; border: 1px solid red">Carrot</span>
+  `;
 }
 
 registerComponent(Carrot, 'carrot');

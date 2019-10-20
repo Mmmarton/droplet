@@ -1,26 +1,31 @@
-const componentsList = {};
+export const componentsList = {};
 
 const handler = {
   set: (obj, prop, value) => {
     console.log({ prev: obj[prop], curr: value });
     obj[prop] = value;
     return true;
-  },
-  apply: (target, thisArg, argumentsList) => {
-    console.log('asd');
-    return thisArg[target].apply(this, argumentList);
   }
 };
 
 export function registerComponent(component, tag) {
   componentsList[tag] = component;
-
-  const a = new Proxy(new componentsList['carrot'](), handler);
-  a.update();
-  a.update();
-  a.field = 'bumm';
-  a.array.push('mik');
 }
+
+export function createComponent(componentName) {
+  const component = componentsList[componentName.toLowerCase()];
+  if (component) {
+    const instance = new Proxy(new component(), handler);
+    return {
+      component: instance,
+      data: instance.template
+    };
+  } else {
+    return null;
+  }
+}
+
+
 export function buildTree(DOMnode) {
   const node = {
     type: DOMnode.nodeType,
@@ -28,7 +33,8 @@ export function buildTree(DOMnode) {
     data: DOMnode.data,
     style: getStyle(DOMnode.style),
     classes: DOMnode.classList ? DOMnode.classList.value : '',
-    children: []
+    children: [],
+    ...createComponent(DOMnode.nodeName)
   };
   for (let i = 0; i < DOMnode.childNodes.length; i++) {
     node.children.push(buildTree(DOMnode.childNodes[i]));
@@ -48,6 +54,9 @@ function buildDOMFromNode(node) {
     element = document.createElement(node.name);
     setStyle(element, node.style);
     element.className = node.classes;
+    if (node.component) {
+      element.innerHTML = node.component.template;
+    }
   } else if (node.type === 3) {
     element = document.createTextNode(node.data);
   } else {
@@ -77,20 +86,18 @@ function getStyle(DOMstyle) {
 }
 
 
+export class Carrot {
+  template = `
+  <span style="color: orange; border: 1px solid red">Carrot</span>
+  `;
+}
+
+registerComponent(Carrot, 'carrot');
+
+
 
 const body = document.querySelectorAll('body');
 const bodyElements = buildTree(body[0]);
 renderIntoElement(body[0], bodyElements);
 
-
-export class Carrot {
-  componentName = 'carrot';
-  field = 'Something';
-  array = ['pam'];
-
-  update() {
-    this.field += 'd';
-  }
-}
-
-registerComponent(Carrot, 'carrot');
+console.log(bodyElements);
