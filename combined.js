@@ -18,11 +18,21 @@ export function createComponent(componentName) {
     const instance = new Proxy(new component(), handler);
     return {
       component: instance,
-      data: instance.template
+      data: parseTemplate(instance)
     };
   } else {
     return null;
   }
+}
+
+function parseTemplate(component) {
+  let template = component.template;
+  template.match(/{{[a-zA-Z0-9]*}}/g).forEach(variable => {
+    const name = variable.substring(2, variable.length - 2);
+    template = template.replace(new RegExp(variable, 'g'), component[name]);
+  });
+
+  return template;
 }
 
 
@@ -55,7 +65,7 @@ function buildDOMFromNode(node) {
     setStyle(element, node.style);
     element.className = node.classes;
     if (node.component) {
-      element.innerHTML = node.component.template;
+      element.innerHTML = node.data;
     }
   } else if (node.type === 3) {
     element = document.createTextNode(node.data);
@@ -88,8 +98,10 @@ function getStyle(DOMstyle) {
 
 export class Carrot {
   template = `
-  <span style="color: orange; border: 1px solid red">Carrot</span>
+  <span style="color: orange; border: 1px solid red">Carrot {{number}}</span>
   `;
+
+  number = Math.floor(Math.random() * 100) / 100;
 }
 
 registerComponent(Carrot, 'carrot');
