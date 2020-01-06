@@ -1,9 +1,8 @@
 'use strict';
 
 const isEvent = key => key.startsWith('on');
-
 function componentToNode(component) {
-  const { type, props, children } = component.template || component;
+  const { type, props, children } = component;
   let node;
 
   if (!type) {
@@ -32,42 +31,91 @@ function componentToNode(component) {
   return node;
 }
 
-// the application
+let isDirty = false;
+let mainComponent;
+let mainContainer;
 
-const root = document.querySelectorAll('body')[0];
+function reRender() {
+  if (isDirty) {
+    render(mainContainer, mainComponent);
+    isDirty = false;
+  }
+  setTimeout(reRender, 30);
+}
+setTimeout(reRender, 30);
+
+function render(container, component) {
+  let mainNode = componentToNode(component.template);
+  container.removeChild(container.firstChild);
+  container.appendChild(mainNode);
+}
+
+function setUp(container, component) {
+  mainComponent = component;
+  mainContainer = container;
+  isDirty = true;
+}
+
+// the application
 
 class Component {
   counter = 1;
-  template = {
-    type: 'div',
-    children: [
-      {
-        type: 'h1',
-        props: {
-          className: 'main-title'
-        },
-        children: ['title']
-      },
-      {
-        type: 'p',
-        children: ['count ', this.counter]
-      },
-      {
-        type: 'button',
-        props: {
-          onClick: this.handle
-        },
-        children: ['increment']
-      }
-    ]
-  };
 
-  handle() {
+  constructor() {
+    this.proxy = new Proxy(this, {
+      set(target, name, value) {
+        target[name] = value;
+        isDirty = true;
+        return true;
+      }
+    });
+    this.increment = this.increment.bind(this.proxy);
+    this.decrement = this.decrement.bind(this.proxy);
+    return this.proxy;
+  }
+
+  get template() {
+    return {
+      type: 'div',
+      children: [
+        {
+          type: 'h1',
+          props: {
+            className: 'main-title'
+          },
+          children: ['title']
+        },
+        {
+          type: 'p',
+          children: ['count ', this.counter]
+        },
+        {
+          type: 'button',
+          props: {
+            onClick: this.increment
+          },
+          children: ['increment']
+        },
+        {
+          type: 'button',
+          props: {
+            onClick: this.decrement
+          },
+          children: ['decrement']
+        }
+      ]
+    };
+  }
+
+  increment() {
     this.counter++;
-    console.log('BOO');
+  }
+
+  decrement() {
+    this.counter--;
   }
 }
 
-let mainComponent = new Component();
-let mainNode = componentToNode(mainComponent.template);
-root.appendChild(mainNode);
+const root = document.querySelectorAll('body')[0];
+const component = new Component();
+setUp(root, component);
