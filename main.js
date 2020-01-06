@@ -37,25 +37,33 @@ function componentToNode(component) {
 const root = document.querySelectorAll('body')[0];
 
 class Component {
+  counter = 1;
   template = {
     type: 'div',
     children: [
       {
         type: 'h1',
         props: {
-          className: 'main-title',
-          onClick: this.handle
+          className: 'main-title'
         },
         children: ['title']
       },
       {
         type: 'p',
-        children: ['some content']
+        children: ['count ', this.counter]
+      },
+      {
+        type: 'button',
+        props: {
+          onClick: this.handle
+        },
+        children: ['increment']
       }
     ]
   };
 
   handle() {
+    this.counter++;
     console.log('BOO');
   }
 }
