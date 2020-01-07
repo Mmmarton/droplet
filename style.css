@@ -2,11 +2,3 @@
   font-size: 40px;
   text-decoration: underline;
 }
-
-.hobby {
-  display: inline-block;
-  border: 1px solid #874;
-  border-radius: 2px;
-  margin: 2px;
-  padding: 2px;
-}

@@ -107,55 +107,9 @@ class ManiComponent extends Component {
         },
         {
           type: 'p',
-          children: ['name: ', this.person.name]
-        },
-        {
-          type: 'p',
-          children: ['age: ', this.person.age]
-        },
-        {
-          type: 'p',
-          children: this.person.hobbies
-        },
-        {
-          type: 'button',
-          props: {
-            onClick: this.addHobby
-          },
-          children: ['Add Hobby']
-        },
-        {
-          type: 'button',
-          props: {
-            onClick: this.removeHobby
-          },
-          children: ['Remove Hobby']
+          children: ['Some content']
         }
       ]
-    };
-  }
-
-  addHobby() {
-    this.person = {
-      ...this.person,
-      hobbies: [...this.person.hobbies, this.toHobbyElement('some hobby')]
-    };
-  }
-
-  removeHobby() {
-    this.person = {
-      ...this.person,
-      hobbies: [...this.person.hobbies.slice(0, this.person.hobbies.length - 1)]
-    };
-  }
-
-  toHobbyElement(hobby) {
-    return {
-      type: 'div',
-      props: {
-        className: 'hobby'
-      },
-      children: [hobby]
     };
   }
 }
@@ -163,3 +117,35 @@ class ManiComponent extends Component {
 const root = document.querySelectorAll('body')[0];
 const component = new ManiComponent();
 setUp(root, component);
+
+let html = `<html>
+  <body>
+    <p style='something' className='otherThing' onClick='eat'>An ordered list:</p>
+  </body>
+</html>`;
+
+function parseHTML(html) {
+  html = html.replace(new RegExp(/[\n\r\t]/, 'g'), ' ');
+  html = html.replace(new RegExp(/ {2,}/, 'g'), ' ');
+  html = html.replace(new RegExp('>(.+?)<', 'g'), '>"$1"<');
+  html = html.replace(new RegExp('>" "<', 'g'), '><');
+  html = html.replace(
+    new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"]/, 'g'),
+    '"$1":"$2"'
+  );
+  console.log(html);
+  html = html.replace(
+    new RegExp(/(<[^><]+?)(['"].*")>/, 'g'),
+    '$1"props":{$2}>'
+  );
+  console.log(html);
+  html = html.replace(new RegExp(/<\/(.*?)>/, 'g'), ']}');
+  html = html.replace(new RegExp(/<(.*?)>/, 'g'), '{"type":"$1", "children":[');
+  html = html.replace(new RegExp(/}{/, 'g'), '},{');
+  html = html.replace(new RegExp(/"(.+?) ("props".+?})"/, 'g'), '"$1", $2');
+  html = html.replace(new RegExp(/" ?"/, 'g'), '","');
+  console.log(html);
+  console.log(JSON.parse(html));
+}
+
+parseHTML(html);
