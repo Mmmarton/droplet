@@ -45,7 +45,7 @@ function reRender() {
 setTimeout(reRender, 30);
 
 function render(container, component) {
-  let mainNode = componentToNode(component.template);
+  let mainNode = componentToNode(component.getTemplate());
   container.removeChild(container.firstChild);
   container.appendChild(mainNode);
 }
@@ -56,11 +56,7 @@ function setUp(container, component) {
   isDirty = true;
 }
 
-// the application
-
 class Component {
-  counter = 1;
-
   constructor() {
     this.proxy = new Proxy(this, {
       set(target, name, value) {
@@ -69,12 +65,35 @@ class Component {
         return true;
       }
     });
-    this.increment = this.increment.bind(this.proxy);
-    this.decrement = this.decrement.bind(this.proxy);
+
+    let methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
+    for (let method of methods) {
+      if (typeof this[method] === 'function' && method !== 'constructor') {
+        this[method] = this[method].bind(this.proxy);
+      }
+    }
+
     return this.proxy;
   }
 
-  get template() {
+  getTemplate() {
+    return '';
+  }
+}
+
+// the application
+
+class ManiComponent extends Component {
+  person = {
+    name: 'jake',
+    age: 15
+  };
+
+  constructor() {
+    super();
+  }
+
+  getTemplate() {
     return {
       type: 'div',
       children: [
@@ -87,7 +106,11 @@ class Component {
         },
         {
           type: 'p',
-          children: ['count ', this.counter]
+          children: ['name: ', this.person.name]
+        },
+        {
+          type: 'p',
+          children: ['age: ', this.person.age]
         },
         {
           type: 'button',
@@ -108,14 +131,14 @@ class Component {
   }
 
   increment() {
-    this.counter++;
+    this.person.age++;
   }
 
   decrement() {
-    this.counter--;
+    this.person.age--;
   }
 }
 
 const root = document.querySelectorAll('body')[0];
-const component = new Component();
+const component = new ManiComponent();
 setUp(root, component);
