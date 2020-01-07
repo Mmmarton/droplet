@@ -45,7 +45,7 @@ function reRender() {
 setTimeout(reRender, 30);
 
 function render(container, component) {
-  let mainNode = componentToNode(component.getTemplate());
+  let mainNode = componentToNode(component.render());
   container.removeChild(container.firstChild);
   container.appendChild(mainNode);
 }
@@ -76,7 +76,7 @@ class Component {
     return this.proxy;
   }
 
-  getTemplate() {
+  render() {
     return '';
   }
 }
@@ -86,14 +86,15 @@ class Component {
 class ManiComponent extends Component {
   person = {
     name: 'jake',
-    age: 15
+    age: 15,
+    hobbies: []
   };
 
   constructor() {
     super();
   }
 
-  getTemplate() {
+  render() {
     return {
       type: 'div',
       children: [
@@ -113,29 +114,49 @@ class ManiComponent extends Component {
           children: ['age: ', this.person.age]
         },
         {
-          type: 'button',
-          props: {
-            onClick: this.increment
-          },
-          children: ['increment']
+          type: 'p',
+          children: this.person.hobbies
         },
         {
           type: 'button',
           props: {
-            onClick: this.decrement
+            onClick: this.addHobby
           },
-          children: ['decrement']
+          children: ['Add Hobby']
+        },
+        {
+          type: 'button',
+          props: {
+            onClick: this.removeHobby
+          },
+          children: ['Remove Hobby']
         }
       ]
     };
   }
 
-  increment() {
-    this.person.age++;
+  addHobby() {
+    this.person = {
+      ...this.person,
+      hobbies: [...this.person.hobbies, this.toHobbyElement('some hobby')]
+    };
   }
 
-  decrement() {
-    this.person.age--;
+  removeHobby() {
+    this.person = {
+      ...this.person,
+      hobbies: [...this.person.hobbies.slice(0, this.person.hobbies.length - 1)]
+    };
+  }
+
+  toHobbyElement(hobby) {
+    return {
+      type: 'div',
+      props: {
+        className: 'hobby'
+      },
+      children: [hobby]
+    };
   }
 }
 
