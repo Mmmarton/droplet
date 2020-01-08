@@ -118,34 +118,75 @@ const root = document.querySelectorAll('body')[0];
 const component = new ManiComponent();
 setUp(root, component);
 
-let html = `<html>
-  <body>
-    <p style='something' className='otherThing' onClick='eat'>An ordered list:</p>
-  </body>
-</html>`;
+let html = `
+  <div>
+    <p style='something' className='red' >An ordered list:</p>
+    <input className='lulu'type='checkbox'/>
+    <span>some content<b>HERE</b> was bold</span>
+</div>`;
 
-function parseHTML(html) {
-  html = html.replace(new RegExp(/[\n\r\t]/, 'g'), ' ');
-  html = html.replace(new RegExp(/ {2,}/, 'g'), ' ');
-  html = html.replace(new RegExp('>(.+?)<', 'g'), '>"$1"<');
-  html = html.replace(new RegExp('>" "<', 'g'), '><');
-  html = html.replace(
-    new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"]/, 'g'),
-    '"$1":"$2"'
-  );
-  console.log(html);
-  html = html.replace(
-    new RegExp(/(<[^><]+?)(['"].*")>/, 'g'),
-    '$1"props":{$2}>'
-  );
-  console.log(html);
-  html = html.replace(new RegExp(/<\/(.*?)>/, 'g'), ']}');
-  html = html.replace(new RegExp(/<(.*?)>/, 'g'), '{"type":"$1", "children":[');
-  html = html.replace(new RegExp(/}{/, 'g'), '},{');
-  html = html.replace(new RegExp(/"(.+?) ("props".+?})"/, 'g'), '"$1", $2');
-  html = html.replace(new RegExp(/" ?"/, 'g'), '","');
-  console.log(html);
-  console.log(JSON.parse(html));
+function setCharAt(string, character, index) {
+  return string.substring(0, index) + character + string.substring(index + 1);
 }
 
-parseHTML(html);
+function html2jsonString(html = '') {
+  let json = '';
+  let lastClosingIndex = 0;
+  for (let i = 0; i < html.length; i++) {
+    if (html[i] === '<' && html[i + 1] !== '/') {
+      if (i > lastClosingIndex + 1) {
+        json += `"${html.substring(lastClosingIndex, i)}",`;
+      }
+      //get element
+      let hasChildren = true;
+      let endIndex = html.indexOf('>', i);
+      let element = html.substring(i + 1, endIndex);
+      if (element[element.length - 1] !== '/') {
+        html = setCharAt(html, ' ', endIndex);
+      } else {
+        hasChildren = false;
+      }
+      let elementName = element.split(' ')[0];
+      json += ` {"elementName":"${elementName}",`;
+
+      //get props
+      let props = element
+        .substring(elementName.length)
+        .replace(
+          new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"][\/ ]?/, 'g'),
+          '"$1":"$2",'
+        );
+      if (props) {
+        json += `"props":{${props}},`;
+      }
+
+      //get content
+      if (hasChildren) {
+        let startIndex = endIndex + 1;
+        endIndex = html.indexOf(`</${elementName}>`, endIndex);
+        let content = html.substring(startIndex, endIndex);
+        json += `"children":[${html2jsonString(content)}]`;
+        i = endIndex + 1;
+      }
+    } else if (html[i] === '>') {
+      json += '},';
+      lastClosingIndex = i + 1;
+    }
+  }
+  if (lastClosingIndex !== html.length) {
+    json += `"${html.substring(lastClosingIndex)}",`;
+  }
+  return json;
+}
+
+function html2json(html) {
+  html = html.replace(new RegExp(/[\n\r\t]/, 'g'), ' ');
+  html = html.replace(new RegExp(/ {2,}/, 'g'), ' ');
+  html = html.replace(new RegExp(/> </, 'g'), '><');
+  let jsonString = html2jsonString(html);
+  jsonString = jsonString.replace(new RegExp(/(,([\]\}$]))|(,$)/, 'g'), '$1');
+  jsonString = jsonString.replace(new RegExp(/,([\]\}$])/, 'g'), '$1');
+  return JSON.parse(jsonString);
+}
+
+console.log(html2json(html));
