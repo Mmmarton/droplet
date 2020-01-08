@@ -1,5 +1,7 @@
 'use strict';
 
+import mainComponentTemplate from './MainComponent.html';
+
 const isEvent = key => key.startsWith('on');
 function componentToNode(component) {
   const { type, props, children } = component;
@@ -118,13 +120,6 @@ const root = document.querySelectorAll('body')[0];
 const component = new ManiComponent();
 setUp(root, component);
 
-let html = `
-  <div>
-    <p style='something' className='red' >An ordered list:</p>
-    <input className='lulu'type='checkbox'/>
-    <span>some content<b>HERE</b> was bold</span>
-</div>`;
-
 function setCharAt(string, character, index) {
   return string.substring(0, index) + character + string.substring(index + 1);
 }
@@ -153,10 +148,11 @@ function html2jsonString(html = '') {
       let props = element
         .substring(elementName.length)
         .replace(
-          new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"][\/ ]?/, 'g'),
+          new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"]((\/)|( \/))?/, 'g'),
           '"$1":"$2",'
         );
       if (props) {
+        console.log('props', props);
         json += `"props":{${props}},`;
       }
 
@@ -186,7 +182,8 @@ function html2json(html) {
   let jsonString = html2jsonString(html);
   jsonString = jsonString.replace(new RegExp(/(,([\]\}$]))|(,$)/, 'g'), '$1');
   jsonString = jsonString.replace(new RegExp(/,([\]\}$])/, 'g'), '$1');
+  console.log(jsonString);
   return JSON.parse(jsonString);
 }
 
-console.log(html2json(html));
+console.log(html2json(mainComponentTemplate));

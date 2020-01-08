@@ -13,6 +13,11 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {}
+      },
+      {
+        test: /\.html$/,
+        exclude: /node_modules/,
+        loader: 'html-loader'
       }
     ]
   },
