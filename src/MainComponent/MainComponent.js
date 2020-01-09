@@ -9,11 +9,9 @@ export class MainComponent extends Component {
   constructor() {
     super();
     this.setTemplate(template);
-    
   }
 
   increment() {
-    console.log('aaa');
     this.age++;
   }
 }
