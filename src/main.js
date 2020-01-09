@@ -1,21 +1,14 @@
 'use strict';
 
-import { Component, setUp } from './droplet';
-import template from './MainComponent.html';
+import { Component, setEntryComponent } from './droplet';
 
 class ManiComponent extends Component {
-  person = {
-    name: 'jake',
-    age: 15,
-    hobbies: []
-  };
+  name = 'Jake';
 
   constructor() {
     super();
-    this.setTemplate(template);
+    this.setTemplate('MainComponent.html');
   }
 }
 
-const root = document.querySelectorAll('body')[0];
-const component = new ManiComponent();
-setUp(root, component);
+setEntryComponent(new ManiComponent());

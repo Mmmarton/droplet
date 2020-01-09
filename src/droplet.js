@@ -34,8 +34,8 @@ function componentToNode(component) {
 }
 
 let isDirty = false;
+let mainContainer = document.querySelectorAll('body')[0];
 let mainComponent;
-let mainContainer;
 
 function reRender() {
   if (isDirty) {
@@ -52,9 +52,8 @@ function render(container, component) {
   container.appendChild(mainNode);
 }
 
-function setUp(container, component) {
+function setEntryComponent(component) {
   mainComponent = component;
-  mainContainer = container;
   isDirty = true;
 }
 
@@ -79,8 +78,12 @@ class Component {
     return this.proxy;
   }
 
-  setTemplate(template) {
-    this.template = template;
+  setTemplate(path) {
+    if (path.endsWith('.html')) {
+      this.template = require(`./${path}`);
+    } else {
+      this.template = path;
+    }
   }
 
   render() {
@@ -88,4 +91,4 @@ class Component {
   }
 }
 
-export { Component, setUp };
+export { Component, setEntryComponent };
