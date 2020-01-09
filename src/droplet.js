@@ -62,14 +62,18 @@ function insertDynamicLinkings(component, template) {
   }
   let newTemplate = { ...template, props: {}, children: [] };
   for (let prop in template.props) {
+    let actualProp = prop;
+    if (prop === 'class') {
+      actualProp = 'className';
+    }
     if (template.props[prop][0] === '{') {
       let propertyName = template.props[prop].substring(
         1,
         template.props[prop].length - 1
       );
-      newTemplate.props[prop] = component[propertyName];
+      newTemplate.props[actualProp] = component[propertyName];
     } else {
-      newTemplate.props[prop] = template.props[prop];
+      newTemplate.props[actualProp] = template.props[prop];
     }
   }
   if (template.children) {

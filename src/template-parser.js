@@ -50,8 +50,9 @@ function html2jsonString(html = '') {
 function getProps(element, elementName) {
   return element
     .substring(elementName.length)
+    .replace(/((\/)|( \/))?/, '')
     .replace(
-      new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"]((\/)|( \/))?/, 'g'),
+      new RegExp(/([a-zA-Z0-9]+?)\=['"](.+?)['"]((\/)|( \/))?/, 'g'),
       '"$1":"$2",'
     );
 }
@@ -63,6 +64,7 @@ function html2json(html) {
   let jsonString = html2jsonString(html);
   jsonString = jsonString.replace(new RegExp(/(,([\]\}$]))|(,$)/, 'g'), '$1');
   jsonString = jsonString.replace(new RegExp(/,([\]\}$])/, 'g'), '$1');
+  console.log(jsonString);
   return JSON.parse(jsonString);
 }
 
