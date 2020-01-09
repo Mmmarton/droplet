@@ -1,5 +1,4 @@
 'use strict';
-
 import { html2json } from './template-parser';
 
 const isEvent = key => key.startsWith('on');
@@ -78,12 +77,8 @@ class Component {
     return this.proxy;
   }
 
-  setTemplate(path) {
-    if (path.endsWith('.html')) {
-      this.template = require(`./${path}`);
-    } else {
-      this.template = path;
-    }
+  setTemplate(template) {
+    this.template = template;
   }
 
   render() {

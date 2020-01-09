@@ -1,14 +1,4 @@
-'use strict';
+import { setEntryComponent } from './droplet';
+import { MainComponent } from './MainComponent/MainComponent';
 
-import { Component, setEntryComponent } from './droplet';
-
-class ManiComponent extends Component {
-  name = 'Jake';
-
-  constructor() {
-    super();
-    this.setTemplate('MainComponent.html');
-  }
-}
-
-setEntryComponent(new ManiComponent());
+setEntryComponent(new MainComponent());
