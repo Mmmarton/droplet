@@ -9,34 +9,27 @@ function html2jsonString(html = '') {
   let lastClosingIndex = 0;
   for (let i = 0; i < html.length; i++) {
     if (html[i] === '<' && html[i + 1] !== '/') {
+      //get content before element
       if (i > lastClosingIndex + 1) {
         json += `"${html.substring(lastClosingIndex, i)}",`;
       }
+
       //get element
-      let hasChildren = true;
       let endIndex = html.indexOf('>', i);
       let element = html.substring(i + 1, endIndex);
-      if (element[element.length - 1] !== '/') {
-        html = setCharAt(html, ' ', endIndex);
-      } else {
-        hasChildren = false;
-      }
       let elementName = element.split(' ')[0];
       json += ` {"elementName":"${elementName}",`;
 
       //get props
-      let props = element
-        .substring(elementName.length)
-        .replace(
-          new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"]((\/)|( \/))?/, 'g'),
-          '"$1":"$2",'
-        );
+      let props = getProps(element, elementName);
       if (props) {
         json += `"props":{${props}},`;
       }
 
-      //get content
+      //get element inner content
+      let hasChildren = element[element.length - 1] !== '/';
       if (hasChildren) {
+        html = setCharAt(html, ' ', endIndex);
         let startIndex = endIndex + 1;
         endIndex = html.indexOf(`</${elementName}>`, endIndex);
         let content = html.substring(startIndex, endIndex);
@@ -52,6 +45,15 @@ function html2jsonString(html = '') {
     json += `"${html.substring(lastClosingIndex)}",`;
   }
   return json;
+}
+
+function getProps(element, elementName) {
+  return element
+    .substring(elementName.length)
+    .replace(
+      new RegExp(/([a-zA-Z0-9]+?)=['"](.+?)['"]((\/)|( \/))?/, 'g'),
+      '"$1":"$2",'
+    );
 }
 
 function html2json(html) {
