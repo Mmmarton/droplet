@@ -64,7 +64,6 @@ function html2json(html) {
   let jsonString = html2jsonString(html);
   jsonString = jsonString.replace(new RegExp(/(,([\]\}$]))|(,$)/, 'g'), '$1');
   jsonString = jsonString.replace(new RegExp(/,([\]\}$])/, 'g'), '$1');
-  console.log(jsonString);
   return JSON.parse(jsonString);
 }
 

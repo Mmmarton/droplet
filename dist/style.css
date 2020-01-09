@@ -3,3 +3,18 @@
   text-decoration: underline;
   color: #984;
 }
+
+.box-container {
+  cursor: pointer;
+  background-color: #ffe8f1;
+  border: 1px solid #826;
+  border-radius: 2px;
+  display: inline-block;
+  padding: 5px;
+  user-select: none;
+  margin-right: 5px;
+}
+
+.box-container p {
+  margin: 0;
+}

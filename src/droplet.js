@@ -4,6 +4,7 @@ import { html2json } from './template-parser';
 let isDirty = false;
 let mainContainer = document.querySelectorAll('body')[0];
 let mainComponent;
+let componentsList = {};
 
 const isEvent = key => key.startsWith('on');
 function componentToNode(component) {
@@ -11,7 +12,11 @@ function componentToNode(component) {
   let node;
 
   if (!elementName) {
-    node = document.createTextNode(component);
+    if (component.template) {
+      node = componentToNode(component.proxy.render());
+    } else {
+      node = document.createTextNode(component);
+    }
   } else {
     node = document.createElement(elementName);
     if (props) {
@@ -95,8 +100,25 @@ function replaceStringWithProperty(string, component) {
   return string;
 }
 
+function insertChildComponents(template) {
+  if (typeof template === 'string') {
+    return template;
+  } else if (componentsList[template.elementName]) {
+    return new componentsList[template.elementName]();
+  }
+  let newTemplate = { ...template, children: [] };
+  if (template.children) {
+    newTemplate.children = [];
+    for (let child of template.children) {
+      newTemplate.children.push(insertChildComponents(child));
+    }
+  }
+  return newTemplate;
+}
+
 class Component {
   template = '';
+
   constructor() {
     this.proxy = new Proxy(this, {
       set(target, name, value) {
@@ -118,6 +140,7 @@ class Component {
 
   setTemplate(template) {
     this.template = html2json(template);
+    this.template = insertChildComponents(this.template);
   }
 
   render() {
@@ -125,4 +148,10 @@ class Component {
   }
 }
 
-export { Component, setEntryComponent };
+function loadComponents(...components) {
+  for (let component of components) {
+    componentsList[component.name] = component;
+  }
+}
+
+export { Component, setEntryComponent, loadComponents };
