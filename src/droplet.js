@@ -56,6 +56,41 @@ function setEntryComponent(component) {
   isDirty = true;
 }
 
+function insertDynamicLinkings(component, template) {
+  if (typeof template === 'string') {
+    return replaceStringWithProperty(template, component);
+  }
+  let newTemplate = { ...template, props: {}, children: [] };
+  for (let prop in template.props) {
+    if (template.props[prop][0] === '{') {
+      let propertyName = template.props[prop].substring(
+        1,
+        template.props[prop].length - 1
+      );
+      newTemplate.props[prop] = component[propertyName];
+    } else {
+      newTemplate.props[prop] = template.props[prop];
+    }
+  }
+  if (template.children) {
+    newTemplate.children = [];
+    for (let child of template.children) {
+      newTemplate.children.push(insertDynamicLinkings(component, child));
+    }
+  }
+  return newTemplate;
+}
+
+function replaceStringWithProperty(string, component) {
+  for (let i = 0; i < string.length; i++) {
+    if (string[i] === '{') {
+      let propertyName = string.substring(i + 1, string.indexOf('}', i));
+      string = string.replace(`{${propertyName}}`, component[propertyName]);
+    }
+  }
+  return string;
+}
+
 class Component {
   template = '';
   constructor() {
@@ -78,15 +113,11 @@ class Component {
   }
 
   setTemplate(template) {
-    this.template = template;
+    this.template = html2json(template);
   }
 
   render() {
-    try {
-      return html2json(this.template);
-    } catch {
-      return this.template;
-    }
+    return insertDynamicLinkings(this, this.template);
   }
 }
 
