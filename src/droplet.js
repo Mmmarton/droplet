@@ -1,6 +1,10 @@
 'use strict';
 import { html2json } from './template-parser';
 
+let isDirty = false;
+let mainContainer = document.querySelectorAll('body')[0];
+let mainComponent;
+
 const isEvent = key => key.startsWith('on');
 function componentToNode(component) {
   const { elementName, props, children } = component;
@@ -31,10 +35,6 @@ function componentToNode(component) {
 
   return node;
 }
-
-let isDirty = false;
-let mainContainer = document.querySelectorAll('body')[0];
-let mainComponent;
 
 function reRender() {
   if (isDirty) {
@@ -82,7 +82,11 @@ class Component {
   }
 
   render() {
-    return this.template ? html2json(this.template) : this.template;
+    try {
+      return html2json(this.template);
+    } catch {
+      return this.template;
+    }
   }
 }
 
