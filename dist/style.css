@@ -1,18 +1,28 @@
+body {
+  padding: 10px 20px;
+  background-color: #ffe8fe;
+  font-family: 'Molengo', sans-serif;
+}
+
 .main-title {
   font-size: 30px;
-  text-decoration: underline;
-  color: #984;
+  font-weight: 700;
+  color: #138562;
+}
+
+hr {
+  margin-bottom: 30px;
 }
 
 .box-container {
   cursor: pointer;
   background-color: #ffe8f1;
-  box-shadow: 1px 1px 3px #826;
+  box-shadow: 1px 1px 3px #841234;
   border-radius: 2px;
   display: inline-block;
   padding: 5px;
   user-select: none;
-  margin-right: 8px;
+  margin: 11px 11px 0 0;
 }
 
 .box-container p {
@@ -38,6 +48,31 @@
   box-shadow: 1px 1px 2px #fff, -1px -1px 2px #e9c;
 }
 
-.box-container button:focus {
+.box-container button:focus,
+.shady-button:focus {
   outline: none;
+}
+
+.shady-button {
+  background-color: #138562;
+  box-shadow: 2px 2px 3px #c89, -2px -2px 3px #fff;
+  border: none;
+  border-radius: 2px;
+  margin: 3px;
+  padding: 6px 12px 6px 12px;
+  cursor: pointer;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.shady-button:hover {
+  background-color: #138562;
+  box-shadow: 3px 3px 4px #c89, -1px -1px 4px #fff;
+}
+
+.shady-button:active {
+  background-color: #138562;
+  box-shadow: 1px 1px 2px #fff, -1px -1px 2px #c89;
+  padding: 4px 13px 7px 11px;
+  margin-bottom: 4px;
 }

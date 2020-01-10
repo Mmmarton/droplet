@@ -1,12 +1,14 @@
 <div>
     <p class='main-title'>An ordered list:</p>
     <input class='lulu' type='{type}' />
-    <span>some content <b style='color: red'>HERE</b> was bold</span>
+    <span>some content <b style='color: #841234'>HERE</b> was bold</span>
     <p>The name is: {name}, the age is {age}.</p>
     <p>The last child value is {lastChildValue}.</p>
 
-    <button onclick="{increment}">Increment</button>
+    <button class='shady-button' onclick="{increment}">Increment</button>
     <hr />
+    <BoxComponent base="{age}" log="{log}" />
+    <BoxComponent base="{age}" log="{log}" />
     <BoxComponent base="{age}" log="{log}" />
     <BoxComponent base="{age}" log="{log}" />
     <BoxComponent base="{age}" log="{log}" />
