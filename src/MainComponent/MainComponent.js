@@ -6,7 +6,9 @@ export class MainComponent extends Component {
   age = 12;
   type = 'checkbox';
   lastChildValue = 0;
-  hide = true;
+  hide1 = false;
+  hide2 = true;
+  count = 5;
 
   constructor() {
     super();

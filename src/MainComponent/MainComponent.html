@@ -7,5 +7,8 @@
 
     <button class='shady-button' onclick="{increment}">Increment</button>
     <hr />
-    <BoxComponent *if="{hide}" base="{age}" log="{log}" />
+    <BoxComponent *if="{hide1}" base="{age}" log="{log}" />
+    <BoxComponent *if="{hide2}" base="{age}" log="{log}" />
+    <hr />
+    <BoxComponent *for="{count}" base="{age}" log="{log}" />
 </div>
