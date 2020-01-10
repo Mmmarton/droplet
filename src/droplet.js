@@ -76,7 +76,10 @@ function insertDynamicLinkings(component, template) {
         1,
         template.props[prop].length - 1
       );
-      newTemplate.props[actualProp] = component[propertyName];
+      newTemplate.props[actualProp] = component.get(propertyName);
+      if (newTemplate.proxy) {
+        newTemplate.proxy.inputs = newTemplate.props;
+      }
     } else {
       newTemplate.props[actualProp] = template.props[prop];
     }
@@ -87,6 +90,7 @@ function insertDynamicLinkings(component, template) {
       newTemplate.children.push(insertDynamicLinkings(component, child));
     }
   }
+
   return newTemplate;
 }
 
@@ -94,7 +98,7 @@ function replaceStringWithProperty(string, component) {
   for (let i = 0; i < string.length; i++) {
     if (string[i] === '{') {
       let propertyName = string.substring(i + 1, string.indexOf('}', i));
-      string = string.replace(`{${propertyName}}`, component[propertyName]);
+      string = string.replace(`{${propertyName}}`, component.get(propertyName));
     }
   }
   return string;
@@ -104,7 +108,9 @@ function insertChildComponents(template) {
   if (typeof template === 'string') {
     return template;
   } else if (componentsList[template.elementName]) {
-    return new componentsList[template.elementName]();
+    let element = new componentsList[template.elementName]();
+    element.props = { ...template.props };
+    return element;
   }
   let newTemplate = { ...template, children: [] };
   if (template.children) {
@@ -117,6 +123,7 @@ function insertChildComponents(template) {
 }
 
 class Component {
+  inputs = {};
   template = '';
 
   constructor() {
@@ -145,6 +152,15 @@ class Component {
 
   render() {
     return insertDynamicLinkings(this, this.template);
+  }
+
+  get(propertyPath = '') {
+    let value = this;
+    let properties = propertyPath.split('.');
+    for (let property of properties) {
+      value = value[property];
+    }
+    return value;
   }
 }
 
