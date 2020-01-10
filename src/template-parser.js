@@ -52,7 +52,7 @@ function getProps(element, elementName) {
     .substring(elementName.length)
     .replace(/((\/)|( \/))?/, '')
     .replace(
-      new RegExp(/([a-zA-Z0-9]+?)\=['"](.+?)['"]((\/)|( \/))?/, 'g'),
+      new RegExp(/([a-zA-Z0-9*]+?)\=['"](.+?)['"]((\/)|( \/))?/, 'g'),
       '"$1":"$2",'
     );
 }

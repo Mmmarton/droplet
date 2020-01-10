@@ -11,6 +11,10 @@ function componentToNode(component) {
   const { elementName, props, children } = component;
   let node;
 
+  if (props && props['*if']) {
+    return null;
+  }
+
   if (!elementName) {
     if (component.template) {
       node = componentToNode(component.proxy.render());
@@ -33,7 +37,10 @@ function componentToNode(component) {
     if (children) {
       for (let i = 0; i < children.length; i++) {
         let child = children[i];
-        node.appendChild(componentToNode(child));
+        let childNode = componentToNode(child);
+        if (childNode) {
+          node.appendChild(childNode);
+        }
       }
     }
   }
@@ -52,7 +59,9 @@ setTimeout(reRender, 30);
 
 function render(container, component) {
   let mainNode = componentToNode(component.render());
-  container.removeChild(container.firstChild);
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
   container.appendChild(mainNode);
 }
 
