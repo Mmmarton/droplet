@@ -12,4 +12,8 @@ export class BoxComponent extends Component {
   increase() {
     this.number++;
   }
+
+  sendValue() {
+    this.inputs.log(this.number);
+  }
 }

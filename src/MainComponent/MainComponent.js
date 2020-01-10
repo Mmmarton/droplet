@@ -5,6 +5,7 @@ export class MainComponent extends Component {
   name = 'Jake';
   age = 12;
   type = 'checkbox';
+  lastChildValue = 0;
 
   constructor() {
     super();
@@ -15,7 +16,7 @@ export class MainComponent extends Component {
     this.age++;
   }
 
-  log() {
-    console.log('HAH');
+  log(value) {
+    this.lastChildValue = value;
   }
 }
