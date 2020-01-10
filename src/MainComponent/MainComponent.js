@@ -14,4 +14,8 @@ export class MainComponent extends Component {
   increment() {
     this.age++;
   }
+
+  log() {
+    console.log('HAH');
+  }
 }

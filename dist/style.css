@@ -7,14 +7,37 @@
 .box-container {
   cursor: pointer;
   background-color: #ffe8f1;
-  border: 1px solid #826;
+  box-shadow: 1px 1px 3px #826;
   border-radius: 2px;
   display: inline-block;
   padding: 5px;
   user-select: none;
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 .box-container p {
   margin: 0;
+}
+
+.box-container button {
+  background-color: #ffe8f1;
+  box-shadow: 2px 2px 3px #e9c, -2px -2px 3px #fff;
+  border: none;
+  border-radius: 2px;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.box-container button:hover {
+  background-color: #fce1ed;
+  box-shadow: 3px 3px 4px #d8a, -1px -1px 4px #fff;
+}
+
+.box-container button:active {
+  background-color: #fce1ed;
+  box-shadow: 1px 1px 2px #fff, -1px -1px 2px #e9c;
+}
+
+.box-container button:focus {
+  outline: none;
 }
