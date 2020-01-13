@@ -4,7 +4,8 @@
   "description": "---",
   "main": "main.js",
   "scripts": {
-    "start": "webpack-dev-server --hot"
+    "start": "webpack-dev-server --hot",
+    "build": "npx webpack --mode=production"
   },
   "repository": {
     "type": "git",
