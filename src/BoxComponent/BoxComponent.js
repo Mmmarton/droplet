@@ -16,4 +16,8 @@ export class BoxComponent extends Component {
   sendValue() {
     this.inputs.log(this.number);
   }
+
+  remove() {
+    this.inputs.remove(this.inputs.index);
+  }
 }

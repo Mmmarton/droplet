@@ -34,4 +34,8 @@ export class MainComponent extends Component {
   removeChildren() {
     this.children = this.children.slice(0, this.children.length - 1);
   }
+
+  remove(index) {
+    this.children = this.children.filter(child => child.index !== index);
+  }
 }
