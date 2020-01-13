@@ -1,18 +1,8 @@
-<div>
-    <p class='main-title'>An ordered list:</p>
-    <input class='lulu' type='{type}' checked='{hide2}' onchange='{checkboxChange}' />
-    <span>some content <b style='color: #841234'>HERE</b> was bold</span>
-    <p>The name is: {name}, the age is {age}.</p>
-    <p>The last child value is {lastChildValue}.</p>
-
-    <button class='shady-button' onclick="{increment}">Increment</button>
-    <hr />
-    <BoxComponent *if="{hide1}" base="{age}" log="{log}" />
-    <BoxComponent *if="{hide2}" base="{age}" log="{log}" />
-    <hr />
-    <p>Child count: {childCount}
-        <button class="pink-button" onclick="{addChildren}">+</button>
-        <button class="pink-button" onclick="{removeChildren}">-</button>
-    </p>
-    <BoxComponent *for="{children}" base="{age}" log="{log}" remove="{remove}" />
+<div class='main-container'>
+    <h1 class='title'>To do:</h1>
+    <input class='todo-text' value='{text.content}' onkeyup="{updateText}" type="text" />
+    <button class='shady-button big-button' onclick="{addIem}">Add</button>
+    <ul class='list'>
+        <ListItem *for='{listItems}' remove='{removeItem}' />
+    </ul>
 </div>

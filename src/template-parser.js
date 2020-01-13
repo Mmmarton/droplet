@@ -7,7 +7,7 @@ function setCharAt(string, character, index) {
 function html2jsonString(html = '') {
   let json = '';
   let lastClosingIndex = 0;
-  for (let i = 0; i < html.length; i++) {
+  for (let i = 0; i < html.length && i < 10000; i++) {
     if (html[i] === '<' && html[i + 1] !== '/') {
       //get content before element
       if (i > lastClosingIndex + 1) {
