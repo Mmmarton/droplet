@@ -16,7 +16,14 @@ function componentToNode(component) {
   }
 
   if (!elementName) {
-    if (component.template) {
+    if (component.model) {
+      let nodes = [];
+      for (let child of component.children) {
+        let childNode = componentToNode(child);
+        nodes.push(childNode);
+      }
+      node = nodes;
+    } else if (component.template) {
       node = componentToNode(component.proxy.render());
     } else {
       node = document.createTextNode(component);
@@ -37,9 +44,15 @@ function componentToNode(component) {
     if (children) {
       for (let i = 0; i < children.length; i++) {
         let child = children[i];
-        let childNode = componentToNode(child);
-        if (childNode) {
-          node.appendChild(childNode);
+        let childNodes = componentToNode(child);
+        if (childNodes) {
+          if (childNodes.push) {
+            for (let childNode of childNodes) {
+              node.appendChild(childNode);
+            }
+          } else {
+            node.appendChild(childNodes);
+          }
         }
       }
     }
@@ -100,6 +113,19 @@ function insertDynamicLinkings(component, template) {
     }
   }
 
+  if (newTemplate.model) {
+    let actualAmount = newTemplate.children.length;
+    let neededAmount = newTemplate.props['*for'];
+    for (let i = 0; i < neededAmount - actualAmount; i++) {
+      let subTemplate = generateTemplateWithChildObjects({
+        ...newTemplate.model,
+        inputs: { ...newTemplate.props }
+      });
+      template.children.push(subTemplate);
+      newTemplate.children = template.children;
+    }
+  }
+
   return newTemplate;
 }
 
@@ -113,22 +139,40 @@ function replaceStringWithProperty(string, component) {
   return string;
 }
 
-function insertChildComponents(template) {
+function generateTemplateWithChildObjects(template) {
+  let generatedTemplate;
   if (typeof template === 'string') {
-    return template;
+    generatedTemplate = template;
   } else if (componentsList[template.elementName]) {
     let element = new componentsList[template.elementName]();
+    element.inputs = { ...template.inputs };
     element.props = { ...template.props };
-    return element;
+    generatedTemplate = element;
+  } else {
+    let newTemplate = { ...template, children: [] };
+    if (template.children) {
+      newTemplate.children = [];
+      for (let child of template.children) {
+        newTemplate.children.push(insertChildObjects(child));
+      }
+    }
+    generatedTemplate = newTemplate;
   }
-  let newTemplate = { ...template, children: [] };
-  if (template.children) {
-    newTemplate.children = [];
-    for (let child of template.children) {
-      newTemplate.children.push(insertChildComponents(child));
+  return generatedTemplate;
+}
+
+function insertChildObjects(template) {
+  for (let prop in template.props) {
+    if (prop === '*for') {
+      return {
+        props: template.props,
+        model: template,
+        children: []
+      };
     }
   }
-  return newTemplate;
+
+  return generateTemplateWithChildObjects(template);
 }
 
 class Component {
@@ -156,7 +200,7 @@ class Component {
 
   setTemplate(template) {
     this.template = html2json(template);
-    this.template = insertChildComponents(this.template);
+    this.template = insertChildObjects(this.template);
   }
 
   render() {
