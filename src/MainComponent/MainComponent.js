@@ -8,7 +8,7 @@ export class MainComponent extends Component {
   lastChildValue = 0;
   hide1 = false;
   hide2 = true;
-  count = 5;
+  childCount = 5;
 
   constructor() {
     super();
@@ -21,5 +21,13 @@ export class MainComponent extends Component {
 
   log(value) {
     this.lastChildValue = value;
+  }
+
+  addChildren() {
+    this.childCount++;
+  }
+
+  removeChildren() {
+    this.childCount--;
   }
 }

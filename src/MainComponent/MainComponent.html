@@ -10,5 +10,9 @@
     <BoxComponent *if="{hide1}" base="{age}" log="{log}" />
     <BoxComponent *if="{hide2}" base="{age}" log="{log}" />
     <hr />
-    <BoxComponent *for="{count}" base="{age}" log="{log}" />
+    <p>Child count: {childCount}
+        <button class="pink-button" onclick="{addChildren}">+</button>
+        <button class="pink-button" onclick="{removeChildren}">-</button>
+    </p>
+    <BoxComponent *for="{childCount}" base="{age}" log="{log}" />
 </div>

@@ -124,6 +124,10 @@ function insertDynamicLinkings(component, template) {
       template.children.push(subTemplate);
       newTemplate.children = template.children;
     }
+    if (neededAmount < actualAmount) {
+      template.children = template.children.slice(0, neededAmount);
+      newTemplate.children = newTemplate.children.slice(0, neededAmount);
+    }
   }
 
   return newTemplate;
