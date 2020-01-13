@@ -18,7 +18,12 @@ function componentToNode(component) {
   if (!elementName) {
     if (component.model) {
       let nodes = [];
-      for (let child of component.children) {
+      for (let i = 0; i < component.children.length; i++) {
+        let child = component.children[i];
+        child.proxy.inputs = {
+          ...child.proxy.inputs,
+          ...component.props['*for'][i]
+        };
         let childNode = componentToNode(child);
         nodes.push(childNode);
       }
@@ -115,7 +120,8 @@ function insertDynamicLinkings(component, template) {
 
   if (newTemplate.model) {
     let actualAmount = newTemplate.children.length;
-    let neededAmount = newTemplate.props['*for'];
+    let inputsArray = newTemplate.props['*for'];
+    let neededAmount = inputsArray.length;
     for (let i = 0; i < neededAmount - actualAmount; i++) {
       let subTemplate = generateTemplateWithChildObjects({
         ...newTemplate.model,
@@ -123,6 +129,12 @@ function insertDynamicLinkings(component, template) {
       });
       template.children.push(subTemplate);
       newTemplate.children = template.children;
+    }
+    for (let i = 0; i < neededAmount; i++) {
+      newTemplate.children[i].inputs = {
+        ...newTemplate.children[i].inputs,
+        ...inputsArray[i]
+      };
     }
     if (neededAmount < actualAmount) {
       template.children = template.children.slice(0, neededAmount);

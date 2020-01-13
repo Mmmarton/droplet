@@ -8,11 +8,15 @@ export class MainComponent extends Component {
   lastChildValue = 0;
   hide1 = false;
   hide2 = true;
-  childCount = 5;
+  children = [];
 
   constructor() {
     super();
     this.setTemplate(template);
+  }
+
+  get childCount() {
+    return this.children ? this.children.length : 0;
   }
 
   increment() {
@@ -24,10 +28,10 @@ export class MainComponent extends Component {
   }
 
   addChildren() {
-    this.childCount++;
+    this.children = [...this.children, { index: this.childCount }];
   }
 
   removeChildren() {
-    this.childCount--;
+    this.children = this.children.slice(0, this.children.length - 1);
   }
 }
