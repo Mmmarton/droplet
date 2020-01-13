@@ -20,4 +20,8 @@ export class BoxComponent extends Component {
   remove() {
     this.inputs.remove(this.inputs.index);
   }
+
+  isInput() {
+    return this.inputs.index === 0 || this.inputs.index;
+  }
 }

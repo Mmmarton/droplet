@@ -6,9 +6,10 @@ export class MainComponent extends Component {
   age = 12;
   type = 'checkbox';
   lastChildValue = 0;
-  hide1 = false;
-  hide2 = true;
+  hide1 = true;
+  hide2 = null;
   children = [];
+  lastIndex = 0;
 
   constructor() {
     super();
@@ -28,7 +29,7 @@ export class MainComponent extends Component {
   }
 
   addChildren() {
-    this.children = [...this.children, { index: this.childCount }];
+    this.children = [...this.children, { index: this.lastIndex++ }];
   }
 
   removeChildren() {
@@ -37,5 +38,9 @@ export class MainComponent extends Component {
 
   remove(index) {
     this.children = this.children.filter(child => child.index !== index);
+  }
+
+  checkboxChange(event) {
+    this.hide2 = event.target.checked;
   }
 }

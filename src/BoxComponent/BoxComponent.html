@@ -1,5 +1,5 @@
 <div class='box-container'>
-    <p>Base: {inputs.base}, own value: {number}, index: {inputs.index}
+    <p>Base: {inputs.base}, own value: {number}<span *if="{isInput}">, index: {inputs.index}</span>
         <button class="pink-button" onclick="{increase}">+</button>
         <button class="pink-button" onclick="{sendValue}">^</button>
         <button class="pink-button" onclick="{remove}">x</button></p>

@@ -11,7 +11,11 @@ function componentToNode(component) {
   const { elementName, props, children } = component;
   let node;
 
-  if (props && props['*if']) {
+  if (
+    props &&
+    props.hasOwnProperty('*if') &&
+    (!props['*if'] || (typeof props['*if'] === 'function' && !props['*if']()))
+  ) {
     return null;
   }
 
