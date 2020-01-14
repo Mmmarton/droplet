@@ -77,7 +77,6 @@ function reRender() {
   }
   setTimeout(reRender, 30);
 }
-// move to requestIdleCallback approach
 setTimeout(reRender, 30);
 
 function render(container, component) {

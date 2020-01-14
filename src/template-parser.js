@@ -8,7 +8,11 @@ function html2jsonString(html = '') {
   let json = '';
   let lastClosingIndex = 0;
   for (let i = 0; i < html.length && i < 10000; i++) {
-    if (html[i] === '<' && html[i + 1] !== '/') {
+    if (html[i] === '<' && html[i + 1] === '!') {
+      let endIndex = html.indexOf('->', i);
+      i = endIndex + 1;
+      lastClosingIndex = i + 1;
+    } else if (html[i] === '<' && html[i + 1] !== '/') {
       //get content before element
       if (i > lastClosingIndex + 1) {
         json += `"${html.substring(lastClosingIndex, i)}",`;
