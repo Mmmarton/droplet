@@ -70,7 +70,7 @@ body {
   top: -3px;
 }
 
-content {
+.content {
   line-height: 26px;
   vertical-align: top;
 }

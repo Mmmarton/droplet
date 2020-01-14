@@ -9,6 +9,7 @@ function html2jsonString(html = '') {
   let lastClosingIndex = 0;
   for (let i = 0; i < html.length && i < 10000; i++) {
     if (html[i] === '<' && html[i + 1] === '!') {
+      //handle comments
       let endIndex = html.indexOf('->', i);
       i = endIndex + 1;
       lastClosingIndex = i + 1;
@@ -35,8 +36,20 @@ function html2jsonString(html = '') {
       if (hasChildren) {
         html = setCharAt(html, ' ', endIndex);
         let startIndex = endIndex + 1;
-        endIndex = html.indexOf(`</${elementName}>`, endIndex);
-        let content = html.substring(startIndex, endIndex);
+
+        let openings,
+          closings,
+          content,
+          k = 5;
+        do {
+          endIndex = html.indexOf(`</${elementName}>`, endIndex + 1);
+          content = html.substring(startIndex, endIndex);
+          openings = (content.match(new RegExp(`<${elementName}`, 'g')) || [])
+            .length;
+          closings = (content.match(new RegExp(`</${elementName}`, 'g')) || [])
+            .length;
+        } while (openings !== closings && k--);
+
         json += `"children":[${html2jsonString(content)}]`;
         i = endIndex + 1;
       }
