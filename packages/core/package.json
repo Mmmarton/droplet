@@ -1,0 +1,45 @@
+{
+  "name": "@csereimarton/droplet",
+  "version": "1.0.22",
+  "description": "---",
+  "keywords": [
+    "droplet"
+  ],
+  "main": "build/droplet.js",
+  "scripts": {
+    "start": "webpack-dev-server --hot",
+    "build": "npx webpack --mode=production",
+    "push": "npm publish --access=public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NuttyYokel/droplet.git"
+  },
+  "author": "Marton Cserei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NuttyYokel/droplet/issues"
+  },
+  "homepage": "https://github.com/NuttyYokel/droplet#readme",
+  "devDependencies": {
+    "@babel/core": "^7.1.6",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.1.6",
+    "babel-loader": "^8.0.4",
+    "babel-preset-es2015": "^6.24.1",
+    "html-loader": "^0.5.5",
+    "rollup": "^1.29.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
+  },
+  "presets": [
+    "es2015"
+  ],
+  "babel": {
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
+    ]
+  }
+}
