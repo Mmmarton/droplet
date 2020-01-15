@@ -2,4 +2,4 @@
 
 Droplet is a minimal JavaScript library for creating user interfaces.
 
-The **core** package contains the core functionality.
+The **droplet** package contains the core functionality.

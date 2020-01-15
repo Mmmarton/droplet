@@ -2,8 +2,8 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "dev": "lerna run dev",
-    "push": "lerna run push",
+    "dev": "lerna run dev --stream --parallel",
+    "push": "lerna run push --stream",
     "bump-version": "lerna version --conventional-commits --yes"
   },
   "devDependencies": {
