@@ -1,7 +1,11 @@
-import { Checkbox } from './Checkbox/Checkbox';
-import { loadComponents, setEntryComponent } from './droplet';
-import { ListItem } from './ListItem/ListItem';
-import { MainComponent } from './MainComponent/MainComponent';
+import { loadComponents, setEntryComponent, Component } from './droplet';
 
-loadComponents(MainComponent, ListItem, Checkbox);
+class MainComponent extends Component {
+  constructor() {
+    super();
+    this.setTemplate('<div>HEY</div>');
+  }
+}
+
+loadComponents(MainComponent);
 setEntryComponent(new MainComponent());

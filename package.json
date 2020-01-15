@@ -1,7 +1,10 @@
 {
   "name": "@csereimarton/droplet",
-  "version": "1.0.20",
+  "version": "1.0.22",
   "description": "---",
+  "keywords": [
+    "droplet"
+  ],
   "main": "build/droplet.js",
   "scripts": {
     "start": "webpack-dev-server --hot",
@@ -13,7 +16,7 @@
     "url": "git+https://github.com/NuttyYokel/droplet.git"
   },
   "author": "Marton Cserei",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/NuttyYokel/droplet/issues"
   },
