@@ -2,10 +2,21 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "start": "lerna run start --scope=@csereimarton/droplet",
+    "dev": "lerna run start --scope=@csereimarton/dev",
+    "build": "lerna run build --scope=@csereimarton/droplet",
     "bump-version": "lerna version --conventional-commits --yes"
   },
   "devDependencies": {
     "lerna": "^3.20.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NuttyYokel/droplet.git"
+  },
+  "author": "Marton Cserei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NuttyYokel/droplet/issues"
+  },
+  "homepage": "https://github.com/NuttyYokel/droplet#readme"
 }
