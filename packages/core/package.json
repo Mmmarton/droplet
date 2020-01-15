@@ -9,8 +9,8 @@
   "scripts": {
     "start": "webpack-dev-server --hot",
     "build": "rollup -c",
-    "push": "npm publish --access=public",
-    "watch": "onchange \"src/*.js\" -- npm run build"
+    "push": "npm run build && npm publish --access=public",
+    "dev": "onchange \"src/*.js\" -- npm run build"
   },
   "repository": {
     "type": "git",

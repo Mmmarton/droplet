@@ -2,8 +2,8 @@
   "name": "root",
   "private": true,
   "scripts": {
-    "dev": "lerna run start --scope=@csereimarton/dev",
-    "build": "lerna run build --scope=@csereimarton/droplet",
+    "dev": "lerna run dev",
+    "push": "lerna run push",
     "bump-version": "lerna version --conventional-commits --yes"
   },
   "devDependencies": {
