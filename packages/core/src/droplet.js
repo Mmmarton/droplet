@@ -243,4 +243,4 @@ function loadComponents(...components) {
   }
 }
 
-export { Component, setEntryComponent, loadComponents };
+export { Component, setEntryComponent, loadComponents, html2json };

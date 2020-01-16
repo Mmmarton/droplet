@@ -1,87 +1,46 @@
 'use strict';
 
-function setCharAt(string, character, index) {
-  return string.substring(0, index) + character + string.substring(index + 1);
+function createDOMnodeFromHTML(htmlString) {
+  let div = document.createElement('div');
+  div.innerHTML = htmlString;
+  return div.firstElementChild;
 }
 
-function html2jsonString(html = '') {
-  let json = '';
-  let lastClosingIndex = 0;
-  for (let i = 0; i < html.length && i < 10000; i++) {
-    if (html[i] === '<' && html[i + 1] === '!') {
-      //handle comments
-      let endIndex = html.indexOf('->', i);
-      i = endIndex + 1;
-      lastClosingIndex = i + 1;
-    } else if (html[i] === '<' && html[i + 1] !== '/') {
-      //get content before element
-      if (i > lastClosingIndex + 1) {
-        json += `"${html.substring(lastClosingIndex, i)}",`;
-      }
+function createJSONfromDOMnode(node) {
+  let json = {
+    elementName: node.nodeName,
+    attributes: {},
+    children: []
+  };
 
-      //get element
-      let endIndex = html.indexOf('>', i);
-      let element = html.substring(i + 1, endIndex);
-      let elementName = element.split(' ')[0];
-      json += ` {"elementName":"${elementName}",`;
+  Object.keys(node.attributes).forEach(key => {
+    json.attributes[node.attributes[key].name] = node.attributes[key].value;
+  });
 
-      //get props
-      let props = getProps(element, elementName);
-      if (props) {
-        json += `"props":{${props}},`;
-      }
-
-      //get element inner content
-      let hasChildren = element[element.length - 1] !== '/';
-      if (hasChildren) {
-        html = setCharAt(html, ' ', endIndex);
-        let startIndex = endIndex + 1;
-
-        let openings,
-          closings,
-          content,
-          k = 5;
-        do {
-          endIndex = html.indexOf(`</${elementName}>`, endIndex + 1);
-          content = html.substring(startIndex, endIndex);
-          openings = (content.match(new RegExp(`<${elementName}`, 'g')) || [])
-            .length;
-          closings = (content.match(new RegExp(`</${elementName}`, 'g')) || [])
-            .length;
-        } while (openings !== closings && k--);
-
-        json += `"children":[${html2jsonString(content)}]`;
-        i = endIndex + 1;
-      }
-    } else if (html[i] === '>') {
-      json += '},';
-      lastClosingIndex = i + 1;
+  Object.keys(node.childNodes).forEach(key => {
+    let child = DOMnodeToJSONChild(node.childNodes[key]);
+    if (child) {
+      json.children.push(child);
     }
-  }
-  if (lastClosingIndex !== html.length) {
-    json += `"${html.substring(lastClosingIndex)}",`;
-  }
+  });
+
   return json;
 }
 
-function getProps(element, elementName) {
-  return element
-    .substring(elementName.length)
-    .replace(/((\/)|( \/))?/, '')
-    .replace(
-      new RegExp(/([a-zA-Z0-9*]+?)\=['"](.+?)['"]((\/)|( \/))?/, 'g'),
-      '"$1":"$2",'
-    );
+function DOMnodeToJSONChild(node) {
+  let nodeName = node.nodeName;
+  if (nodeName === '#text') {
+    let text = node.nodeValue.replace(/(\n|\r)/gm, '').trim();
+    if (text) {
+      return text;
+    }
+  } else if (!nodeName.startsWith('#')) {
+    return createJSONfromDOMnode(node);
+  }
 }
 
 function html2json(html) {
-  html = html.replace(new RegExp(/[\n\r\t]/, 'g'), ' ');
-  html = html.replace(new RegExp(/ {2,}/, 'g'), ' ');
-  html = html.replace(new RegExp(/> </, 'g'), '><');
-  let jsonString = html2jsonString(html);
-  jsonString = jsonString.replace(new RegExp(/(,([\]\}$]))|(,$)/, 'g'), '$1');
-  jsonString = jsonString.replace(new RegExp(/,([\]\}$])/, 'g'), '$1');
-  return JSON.parse(jsonString);
+  return createJSONfromDOMnode(createDOMnodeFromHTML(html));
 }
 
 export { html2json };
