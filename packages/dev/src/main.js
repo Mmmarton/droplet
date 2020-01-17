@@ -1,6 +1,8 @@
 import { html2json } from '@csereimarton/droplet';
 import template from './box.html';
 
+let renderQueue = [];
+
 function renderIntoBody(component) {
   let body = document.querySelectorAll('body')[0];
   while (body.firstChild) {
@@ -76,7 +78,6 @@ function addNodeToRenderQueue(node, object, parent) {
 function workLoop(deadline) {
   let thereIsStillTime = true;
   while (renderQueue.length && thereIsStillTime) {
-    console.log('hop');
     let elementToRender = renderQueue.shift();
     insertFieldsIntoNode(
       elementToRender.node,
@@ -92,12 +93,9 @@ function workLoop(deadline) {
 
 requestIdleCallback(workLoop);
 
-let componentLastUUID = 0;
-let renderQueue = [];
-
 class Component {
-  constructor() {
-    this.UUID = componentLastUUID++;
+  constructor(template) {
+    this.template = html2json(template);
 
     this.proxy = new Proxy(this, {
       set(target, name, value) {
@@ -109,18 +107,13 @@ class Component {
 
     return this.proxy;
   }
-
-  setTemplate(template) {
-    this.template = html2json(template);
-  }
 }
 
 class A extends Component {
   comes = 'COMES';
 
   constructor() {
-    super();
-    this.setTemplate(template);
+    super(template);
   }
 }
 
