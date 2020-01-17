@@ -10,14 +10,6 @@ function renderIntoBody(component) {
   container.appendChild(node);
 }
 
-function update(node) {
-  Object.keys(node.attributes).forEach(key => {
-    if (node.node.attributes[key].value !== node.attributes[key]) {
-      node.node.attributes[key].value = node.attributes[key];
-    }
-  });
-}
-
 function insertFieldsIntoString(string = '', object = {}) {
   let sections = string.split('}');
   let fields = {};
@@ -44,7 +36,9 @@ function insertFieldsIntoNode(node, object) {
 
   if (node.text) {
     newNode.text = insertFieldsIntoString(node.text, object);
-    newNode.node.nodeValue = newNode.text;
+    if (newNode.node.nodeValue !== newNode.text) {
+      newNode.node.nodeValue = newNode.text;
+    }
     return newNode;
   }
 
@@ -53,7 +47,9 @@ function insertFieldsIntoNode(node, object) {
       node.attributes[key],
       object
     );
-    newNode.node.setAttribute(key, newNode.attributes[key]);
+    if (newNode.node.getAttribute(key) !== newNode.attributes[key]) {
+      newNode.node.setAttribute(key, newNode.attributes[key]);
+    }
   });
 
   node.children.forEach(child => {
@@ -109,4 +105,4 @@ a.f1 = 'LOOONG';
 a.f2 = 'SHOORt';
 a.a1 = 'green';
 
-update(a.render());
+a.render();
