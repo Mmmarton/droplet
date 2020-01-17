@@ -2,12 +2,11 @@ import { html2json } from '@csereimarton/droplet';
 // import template from './box.html';
 
 function renderIntoBody(component) {
-  let node = component.render().node;
-  let container = document.querySelectorAll('body')[0];
-  while (container.firstChild) {
-    container.removeChild(container.firstChild);
+  let body = document.querySelectorAll('body')[0];
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
   }
-  container.appendChild(node);
+  addNodeToRenderQueue(component.template, component, body);
 }
 
 function insertFieldsIntoString(string = '', object = {}) {
@@ -27,7 +26,7 @@ function insertFieldsIntoString(string = '', object = {}) {
   return string;
 }
 
-function insertFieldsIntoNode(node, object) {
+function insertFieldsIntoNode(node, object, parent) {
   let newNode = {
     attributes: {},
     children: [],
@@ -53,14 +52,48 @@ function insertFieldsIntoNode(node, object) {
   });
 
   node.children.forEach(child => {
-    newNode.children.push(insertFieldsIntoNode(child, object));
+    addNodeToRenderQueue(child, object, newNode);
   });
 
-  return newNode;
+  if (parent) {
+    parent.appendChild(newNode.node);
+  }
 }
 
+function addNodeToRenderQueue(node, object, parent) {
+  if (!node) {
+    return;
+  }
+
+  let index = renderQueue.findIndex(element => element.node === node);
+  if (index > -1) {
+    renderQueue[index] = { node, object, parent };
+  } else {
+    renderQueue.push({ node, object, parent });
+  }
+}
+
+function workLoop(deadline) {
+  let thereIsStillTime = true;
+  while (renderQueue.length && thereIsStillTime) {
+    console.log('hop');
+    let elementToRender = renderQueue.shift();
+    insertFieldsIntoNode(
+      elementToRender.node,
+      elementToRender.object,
+      elementToRender.parent
+    );
+
+    thereIsStillTime = deadline.timeRemaining() > 0;
+  }
+
+  requestIdleCallback(workLoop);
+}
+
+requestIdleCallback(workLoop);
+
 let componentLastUUID = 0;
-let dirtyComponents = {};
+let renderQueue = [];
 
 class Component {
   constructor() {
@@ -69,7 +102,7 @@ class Component {
     this.proxy = new Proxy(this, {
       set(target, name, value) {
         target[name] = value;
-        dirtyComponents[target.UUID] = target.proxy;
+        addNodeToRenderQueue(target.template, target);
         return true;
       }
     });
@@ -79,10 +112,6 @@ class Component {
 
   setTemplate(template) {
     this.template = html2json(template);
-  }
-
-  render() {
-    return insertFieldsIntoNode(this.template, this);
   }
 }
 
@@ -101,8 +130,14 @@ let a = new A();
 
 renderIntoBody(a);
 
-a.f1 = 'LOOONG';
-a.f2 = 'SHOORt';
-a.a1 = 'green';
+setTimeout(() => {
+  a.f1 = 'HUHA';
+}, 1000);
 
-a.render();
+setTimeout(() => {
+  a.f2 = 'YAHA';
+}, 2000);
+
+setTimeout(() => {
+  a.a1 = 'green';
+}, 3000);
