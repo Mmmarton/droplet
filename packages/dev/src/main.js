@@ -1,5 +1,5 @@
 import { html2json } from '@csereimarton/droplet';
-// import template from './box.html';
+import template from './box.html';
 
 function renderIntoBody(component) {
   let body = document.querySelectorAll('body')[0];
@@ -52,7 +52,7 @@ function insertFieldsIntoNode(node, object, parent) {
   });
 
   node.children.forEach(child => {
-    addNodeToRenderQueue(child, object, newNode);
+    addNodeToRenderQueue(child, object, newNode.node);
   });
 
   if (parent) {
@@ -116,13 +116,11 @@ class Component {
 }
 
 class A extends Component {
+  comes = 'COMES';
+
   constructor() {
     super();
-    this.f1 = 1;
-    this.f2 = 'HEY';
-    this.a1 = 'blue';
-
-    this.setTemplate('<div class="{a1}">{f1} + {f2}</div>');
+    this.setTemplate(template);
   }
 }
 
@@ -131,13 +129,9 @@ let a = new A();
 renderIntoBody(a);
 
 setTimeout(() => {
-  a.f1 = 'HUHA';
-}, 1000);
-
-setTimeout(() => {
-  a.f2 = 'YAHA';
+  a.myClass = 'green';
 }, 2000);
 
 setTimeout(() => {
-  a.a1 = 'green';
+  a.myClass = 'red';
 }, 3000);
