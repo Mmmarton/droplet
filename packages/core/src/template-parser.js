@@ -10,7 +10,8 @@ function createJSONfromDOMnode(node) {
   let json = {
     elementName: node.nodeName,
     attributes: {},
-    children: []
+    children: [],
+    node
   };
 
   Object.keys(node.attributes).forEach(key => {
@@ -32,7 +33,7 @@ function DOMnodeToJSONChild(node) {
   if (nodeName === '#text') {
     let text = node.nodeValue.replace(/(\n|\r)/gm, '').trim();
     if (text) {
-      return text;
+      return { text, node };
     }
   } else if (!nodeName.startsWith('#')) {
     return createJSONfromDOMnode(node);
