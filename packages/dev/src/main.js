@@ -28,6 +28,11 @@ function insertFieldsIntoString(string = '', object = {}) {
   return string;
 }
 
+function getMethodByName(name = '', object) {
+  name = name.substring(1, name.length - 1);
+  return object[name];
+}
+
 function insertFieldsIntoNode(node, object, parent) {
   let newNode = {
     attributes: {},
@@ -44,12 +49,19 @@ function insertFieldsIntoNode(node, object, parent) {
   }
 
   Object.keys(node.attributes).forEach(key => {
-    newNode.attributes[key] = insertFieldsIntoString(
-      node.attributes[key],
-      object
-    );
-    if (newNode.node.getAttribute(key) !== newNode.attributes[key]) {
-      newNode.node.setAttribute(key, newNode.attributes[key]);
+    if (key.startsWith('on')) {
+      if (!node.node[key]) {
+        newNode.node.removeAttribute(key);
+        newNode.node[key] = getMethodByName(node.attributes[key], object);
+      }
+    } else {
+      newNode.attributes[key] = insertFieldsIntoString(
+        node.attributes[key],
+        object
+      );
+      if (newNode.node.getAttribute(key) !== newNode.attributes[key]) {
+        newNode.node.setAttribute(key, newNode.attributes[key]);
+      }
     }
   });
 
@@ -105,6 +117,13 @@ class Component {
       }
     });
 
+    let methods = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
+    for (let method of methods) {
+      if (typeof this[method] === 'function' && method !== 'constructor') {
+        this[method] = this[method].bind(this.proxy);
+      }
+    }
+
     return this.proxy;
   }
 }
@@ -115,16 +134,12 @@ class A extends Component {
   constructor() {
     super(template);
   }
+
+  doThat() {
+    this.comes += Math.floor(Math.random() * 20);
+  }
 }
 
 let a = new A();
 
 renderIntoBody(a);
-
-setTimeout(() => {
-  a.myClass = 'green';
-}, 2000);
-
-setTimeout(() => {
-  a.myClass = 'red';
-}, 3000);
