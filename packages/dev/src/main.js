@@ -1,7 +1,9 @@
 import { html2json } from '@csereimarton/droplet';
-import template from './box.html';
+import boxTemplate from './box.html';
+import template from './main.html';
 
 let renderQueue = [];
+let componentsList = [];
 
 function renderIntoBody(component) {
   let body = document.querySelectorAll('body')[0];
@@ -87,6 +89,23 @@ function addNodeToRenderQueue(node, object, parent) {
   }
 }
 
+function toUpperKebabCase(camelCase = '') {
+  let nameArray = camelCase.split('');
+  for (let i = 1; i < nameArray.length; i++) {
+    if (nameArray[i] >= 'A' && nameArray[i] <= 'Z') {
+      nameArray.splice(i, 1, '-' + nameArray[i]);
+    }
+  }
+  return nameArray.join('').toUpperCase();
+}
+
+function loadComponents(...components) {
+  componentsList = {};
+  components.forEach(component => {
+    componentsList[toUpperKebabCase(component.name)] = component;
+  });
+}
+
 function workLoop(deadline) {
   let thereIsStillTime = true;
   while (renderQueue.length && thereIsStillTime) {
@@ -107,7 +126,7 @@ requestIdleCallback(workLoop);
 
 class Component {
   constructor(template) {
-    this.template = html2json(template);
+    this.template = html2json(template, componentsList);
 
     this.proxy = new Proxy(this, {
       set(target, name, value) {
@@ -128,18 +147,39 @@ class Component {
   }
 }
 
-class A extends Component {
-  comes = 'COMES';
+/*----------------------------------------------------------------*/
+/*-------------------------------APP------------------------------*/
+/*----------------------------------------------------------------*/
+
+class MainComponent extends Component {
+  counter = 0;
 
   constructor() {
     super(template);
   }
 
-  doThat() {
-    this.comes += Math.floor(Math.random() * 20);
+  increase() {
+    this.counter++;
   }
 }
 
-let a = new A();
+class BoxComponent extends Component {
+  constructor() {
+    super(boxTemplate);
+  }
+}
 
-renderIntoBody(a);
+loadComponents(MainComponent, BoxComponent);
+renderIntoBody(new MainComponent());
+
+console.log(new MainComponent().template);
+
+let a = {
+  b: false,
+  c: 0,
+  d: undefined,
+  e: null,
+  f: {}
+};
+
+//hasOwnProperty

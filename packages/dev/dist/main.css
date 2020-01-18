@@ -1,19 +1,18 @@
-.green {
-  color: green;
-}
-
-.blue {
-  color: blue;
-}
-
-.red {
-  color: red;
-}
-
-.special {
-  font-weight: 100;
-  border: 1px solid #fdd;
+.box {
+  border: 1px solid green;
+  border-radius: 3px;
   display: inline-block;
-  margin-right: 10px;
-  padding: 5px;
+  padding: 3px 5px;
+}
+
+.increase {
+  color: #5b2;
+  border: 1px solid #5b2;
+  background-color: #efd;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-weight: 900;
+  margin-left: 10px;
+  cursor: pointer;
+  user-select: none;
 }

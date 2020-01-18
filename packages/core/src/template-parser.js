@@ -6,13 +6,15 @@ function createDOMnodeFromHTML(htmlString) {
   return div.firstElementChild;
 }
 
-function createJSONfromDOMnode(node) {
+function createJSONfromDOMnode(node, componentsList) {
   let json = {
     elementName: node.nodeName,
     attributes: {},
     children: [],
     node
   };
+
+  console.log(node.nodeName);
 
   Object.keys(node.attributes).forEach(key => {
     json.attributes[node.attributes[key].name] = node.attributes[key].value;
@@ -28,7 +30,7 @@ function createJSONfromDOMnode(node) {
   return json;
 }
 
-function DOMnodeToJSONChild(node) {
+function DOMnodeToJSONChild(node, componentsList) {
   let nodeName = node.nodeName;
   if (nodeName === '#text') {
     let text = node.nodeValue.replace(/(\n|\r)/gm, '').trim();
@@ -36,12 +38,13 @@ function DOMnodeToJSONChild(node) {
       return { text, node };
     }
   } else if (!nodeName.startsWith('#')) {
-    return createJSONfromDOMnode(node);
+    return createJSONfromDOMnode(node, componentsList);
   }
 }
 
-function html2json(html) {
-  return createJSONfromDOMnode(createDOMnodeFromHTML(html));
+function html2json(html, componentsList) {
+  console.log(componentsList);
+  return createJSONfromDOMnode(createDOMnodeFromHTML(html), componentsList);
 }
 
 export { html2json };
