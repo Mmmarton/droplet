@@ -1,5 +1,6 @@
 import { html2json } from '@csereimarton/droplet';
 import boxTemplate from './box.html';
+import bulletTemplate from './bullet.html';
 import template from './main.html';
 
 let renderQueue = [];
@@ -10,6 +11,7 @@ function renderIntoBody(component) {
   while (body.firstChild) {
     body.removeChild(body.firstChild);
   }
+  console.log(component);
   addNodeToRenderQueue(component.template, component, body);
 }
 
@@ -164,22 +166,28 @@ class MainComponent extends Component {
 }
 
 class BoxComponent extends Component {
+  classlist = 'common';
+  number = Math.floor(Math.random(100));
+
   constructor() {
     super(boxTemplate);
   }
+
+  increase() {
+    this.number++;
+    if (this.number > 200) {
+      this.classlist = 'special';
+    }
+  }
 }
 
-loadComponents(MainComponent, BoxComponent);
+class BulletComponent extends Component {
+  constructor() {
+    super(bulletTemplate);
+  }
+}
+
+loadComponents(MainComponent, BoxComponent, BulletComponent);
 renderIntoBody(new MainComponent());
-
-console.log(new MainComponent().template);
-
-let a = {
-  b: false,
-  c: 0,
-  d: undefined,
-  e: null,
-  f: {}
-};
 
 //hasOwnProperty

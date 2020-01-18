@@ -11,21 +11,31 @@ function createJSONfromDOMnode(node, componentsList) {
     elementName: node.nodeName,
     attributes: {},
     children: [],
-    node
+    node,
+    component: componentsList[node.nodeName]
   };
-
-  console.log(node.nodeName);
 
   Object.keys(node.attributes).forEach(key => {
     json.attributes[node.attributes[key].name] = node.attributes[key].value;
-  });
-
-  Object.keys(node.childNodes).forEach(key => {
-    let child = DOMnodeToJSONChild(node.childNodes[key]);
-    if (child) {
-      json.children.push(child);
+    if (node.attributes[key].name.startsWith('on')) {
+      node[node.attributes[key].name] = null;
     }
   });
+
+  if (json.component) {
+    json.instance = new json.component();
+    while (json.node.firstChild) {
+      json.node.removeChild(json.node.firstChild);
+    }
+    json.node.appendChild(json.instance.template.node);
+  } else {
+    Object.keys(node.childNodes).forEach(key => {
+      let child = DOMnodeToJSONChild(node.childNodes[key], componentsList);
+      if (child) {
+        json.children.push(child);
+      }
+    });
+  }
 
   return json;
 }
@@ -43,7 +53,6 @@ function DOMnodeToJSONChild(node, componentsList) {
 }
 
 function html2json(html, componentsList) {
-  console.log(componentsList);
   return createJSONfromDOMnode(createDOMnodeFromHTML(html), componentsList);
 }
 
