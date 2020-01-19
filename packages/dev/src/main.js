@@ -11,7 +11,6 @@ function renderIntoBody(component) {
   while (body.firstChild) {
     body.removeChild(body.firstChild);
   }
-  console.log(component);
   addNodeToRenderQueue(component.template, component, body);
 }
 
@@ -21,12 +20,15 @@ function insertFieldsIntoString(string = '', object = {}) {
   for (let section of sections) {
     let field = section.split('{')[1];
     if (field) {
-      fields[field] = object[field];
+      fields[field] = object.getAttribute(field);
     }
   }
 
   Object.keys(fields).forEach(key => {
-    string = string.replace(new RegExp(`{${key}}`, 'g'), object[key]);
+    string = string.replace(
+      new RegExp(`{${key}}`, 'g'),
+      object.getAttribute(key)
+    );
   });
 
   return string;
@@ -68,6 +70,10 @@ function insertFieldsIntoNode(node, object, parent) {
       }
     }
   });
+
+  if (node.instance) {
+    node.instance.inputs = newNode.attributes;
+  }
 
   node.children.forEach(child => {
     addNodeToRenderQueue(child, object, newNode.node);
@@ -147,6 +153,15 @@ class Component {
 
     return this.proxy;
   }
+
+  getAttribute(propertyPath = '') {
+    let value = this;
+    let properties = propertyPath.split('.');
+    for (let property of properties) {
+      value = value[property];
+    }
+    return value;
+  }
 }
 
 /*----------------------------------------------------------------*/
@@ -155,6 +170,7 @@ class Component {
 
 class MainComponent extends Component {
   counter = 0;
+  test = 0;
 
   constructor() {
     super(template);
@@ -162,6 +178,10 @@ class MainComponent extends Component {
 
   increase() {
     this.counter++;
+  }
+
+  changeTest() {
+    this.test = Math.floor(Math.random() * 10);
   }
 }
 
@@ -182,8 +202,18 @@ class BoxComponent extends Component {
 }
 
 class BulletComponent extends Component {
+  shoutText = 'NOPE!!!';
+
   constructor() {
     super(bulletTemplate);
+  }
+
+  shout() {
+    if (this.shoutText === 'NOPE!!!') {
+      this.shoutText = 'YAAAAY!';
+    } else {
+      this.shoutText = 'NOPE!!!';
+    }
   }
 }
 
