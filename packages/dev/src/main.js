@@ -15,8 +15,19 @@ function renderIntoBody(component) {
 }
 
 function insertFieldsIntoString(string = '', object = {}) {
+  if (string[0].startsWith('{') && string.endsWith('}')) {
+    let field = string.substring(1, string.length - 1);
+    if (field.endsWith('()')) {
+      let key = field.substring(0, field.length - 2);
+      if (typeof object.getAttribute(key) === 'function') {
+        return object.getAttribute(key);
+      }
+    }
+  }
+
   let sections = string.split('}');
   let fields = {};
+
   for (let section of sections) {
     let field = section.split('{')[1];
     if (field) {
@@ -199,6 +210,12 @@ class BoxComponent extends Component {
     this.number++;
     if (this.number > 200) {
       this.classlist = 'special';
+    }
+  }
+
+  changeTest() {
+    if (this.inputs['change-test']) {
+      this.inputs['change-test']();
     }
   }
 }

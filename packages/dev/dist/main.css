@@ -34,7 +34,7 @@
 .bullet {
   display: inline-block;
   color: #fec;
-  border-radius: 50%;
+  border-radius: 5px;
   background-color: #471;
   border: 1px solid #461;
   padding: 5px;
