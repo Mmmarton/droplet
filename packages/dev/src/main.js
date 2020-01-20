@@ -80,7 +80,9 @@ function insertFieldsIntoNode(node, object, parent) {
   });
 
   if (parent) {
-    parent.appendChild(newNode.node);
+    if (!parent.children.length) {
+      parent.appendChild(newNode.node);
+    }
   }
 }
 
