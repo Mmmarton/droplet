@@ -2,7 +2,8 @@
     <h3>See some boxes</h3>
     <p>And a counter: {counter} <b class='increase' onclick="{increase}">+</b></p>
     <p>For testing purposes: {test}</p>
+    <input type="text" onkeyup="{changeSecretValue}" value='{secretValue}'>
     <box-component content='{counter}' style='color:#928'>some content</box-component>
-    <box-component content='BASIC'>some content</box-component>
+    <box-component content='{secretValue}'>some content</box-component>
     <box-component change-test='{changeTest()}'>some content</box-component>
 </div>

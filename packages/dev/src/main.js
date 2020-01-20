@@ -184,6 +184,7 @@ class Component {
 class MainComponent extends Component {
   counter = 0;
   test = 0;
+  secretValue = 'hmm';
 
   constructor() {
     super(template);
@@ -193,8 +194,12 @@ class MainComponent extends Component {
     this.counter++;
   }
 
-  changeTest() {
-    this.test = Math.floor(Math.random() * 10);
+  changeTest(value) {
+    this.test = value;
+  }
+
+  changeSecretValue(event) {
+    this.secretValue = event.target.value;
   }
 }
 
@@ -215,7 +220,7 @@ class BoxComponent extends Component {
 
   changeTest() {
     if (this.inputs['change-test']) {
-      this.inputs['change-test']();
+      this.inputs['change-test'](Math.floor(Math.random() * 100));
     }
   }
 }

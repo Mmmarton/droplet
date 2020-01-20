@@ -40,3 +40,7 @@
   padding: 5px;
   margin-top: 3px;
 }
+
+input {
+  display: block;
+}
