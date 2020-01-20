@@ -14,8 +14,11 @@ function renderIntoBody(component) {
   addNodeToRenderQueue(component.template, component, body);
 }
 
+let isSimpleExpression = string =>
+  string[0].startsWith('{') && string.endsWith('}');
+
 function insertFieldsIntoString(string = '', object = {}) {
-  if (string[0].startsWith('{') && string.endsWith('}')) {
+  if (isSimpleExpression(string)) {
     let field = string.substring(1, string.length - 1);
     if (field.endsWith('()')) {
       let key = field.substring(0, field.length - 2);
@@ -35,12 +38,16 @@ function insertFieldsIntoString(string = '', object = {}) {
     }
   }
 
-  Object.keys(fields).forEach(key => {
-    string = string.replace(
-      new RegExp(`{${key}}`, 'g'),
-      object.getAttribute(key)
-    );
-  });
+  if (isSimpleExpression(string)) {
+    return object.getAttribute(Object.keys(fields)[0]);
+  } else {
+    Object.keys(fields).forEach(key => {
+      string = string.replace(
+        new RegExp(`{${key}}`, 'g'),
+        object.getAttribute(key)
+      );
+    });
+  }
 
   return string;
 }
@@ -48,6 +55,15 @@ function insertFieldsIntoString(string = '', object = {}) {
 function getMethodByName(name = '', object) {
   name = name.substring(1, name.length - 1);
   return object[name];
+}
+
+function hasNode(parent, node) {
+  for (let key of parent.childNodes.keys()) {
+    if (parent.childNodes[key] === node) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function insertFieldsIntoNode(node, object, parent) {
@@ -77,7 +93,18 @@ function insertFieldsIntoNode(node, object, parent) {
         object
       );
       if (newNode.node.getAttribute(key) !== newNode.attributes[key]) {
-        newNode.node.setAttribute(key, newNode.attributes[key]);
+        if (key === '*if') {
+          let parentHasNode = hasNode(parent, node.node);
+          if (newNode.attributes[key]) {
+            if (!parentHasNode) {
+              parent.appendChild(node.node);
+            }
+          } else if (parentHasNode) {
+            parent.removeChild(node.node);
+          }
+        } else {
+          newNode.node.setAttribute(key, newNode.attributes[key]);
+        }
       }
     }
   });
@@ -185,6 +212,7 @@ class MainComponent extends Component {
   counter = 0;
   test = 0;
   secretValue = 'hmm';
+  showDot = true;
 
   constructor() {
     super(template);
@@ -200,6 +228,10 @@ class MainComponent extends Component {
 
   changeSecretValue(event) {
     this.secretValue = event.target.value;
+  }
+
+  updateShowDot(event) {
+    this.showDot = event.target.checked;
   }
 }
 
