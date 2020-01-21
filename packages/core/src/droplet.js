@@ -1,209 +1,187 @@
 'use strict';
+/*
+ * Experimental in-between build.
+ * Manipulating DOM elements directly.
+ */
 import { html2json } from './template-parser';
 
-let isDirty = false;
-let mainContainer = document.querySelectorAll('body')[0];
-let mainComponent;
-let componentsList = {};
+let renderQueue = [];
+let componentsList = [];
+let firstRender;
 
-const isEvent = key => key.startsWith('on');
-function componentToNode(component) {
-  const { elementName, props, children } = component;
-  let node;
+function renderIntoBody(component) {
+  let body = document.querySelectorAll('body')[0];
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
+  }
+  firstRender = () => {
+    body.appendChild(component.template.node);
+  };
+  addNodeToRenderQueue(component.template, component, { node: body });
+}
 
-  if (
-    props &&
-    props.hasOwnProperty('*if') &&
-    (!props['*if'] || (typeof props['*if'] === 'function' && !props['*if']()))
-  ) {
-    return null;
+let isSimpleExpression = string =>
+  string[0].startsWith('{') && string.endsWith('}');
+
+function insertFieldsIntoString(string = '', object = {}) {
+  if (isSimpleExpression(string)) {
+    let field = string.substring(1, string.length - 1);
+    if (field.endsWith('()')) {
+      let key = field.substring(0, field.length - 2);
+      if (typeof object.getAttribute(key) === 'function') {
+        return object.getAttribute(key);
+      }
+    }
   }
 
-  if (!elementName) {
-    if (component.model) {
-      let nodes = [];
-      for (let i = 0; i < component.children.length; i++) {
-        let child = component.children[i];
-        child.proxy.inputs = {
-          ...child.proxy.inputs,
-          ...component.props['*for'][i]
-        };
-        let childNode = componentToNode(child);
-        nodes.push(childNode);
-      }
-      node = nodes;
-    } else if (component.template) {
-      node = componentToNode(component.proxy.render());
-    } else {
-      node = document.createTextNode(component);
+  let sections = string.split('}');
+  let fields = {};
+
+  for (let section of sections) {
+    let field = section.split('{')[1];
+    if (field) {
+      fields[field] = object.getAttribute(field);
     }
+  }
+
+  if (isSimpleExpression(string)) {
+    return object.getAttribute(Object.keys(fields)[0]);
   } else {
-    node = document.createElement(elementName);
-    if (props) {
-      Object.keys(props).forEach(key => {
-        if (isEvent(key)) {
-          const eventType = key.toLowerCase().substring(2);
-          node.addEventListener(eventType, props[key]);
-        } else {
-          node[key] = props[key];
-        }
-      });
-    }
-
-    if (children) {
-      for (let i = 0; i < children.length; i++) {
-        let child = children[i];
-        let childNodes = componentToNode(child);
-        if (childNodes) {
-          if (childNodes.push) {
-            for (let childNode of childNodes) {
-              node.appendChild(childNode);
-            }
-          } else {
-            node.appendChild(childNodes);
-          }
-        }
-      }
-    }
-  }
-
-  return node;
-}
-
-function reRender() {
-  if (isDirty) {
-    render(mainContainer, mainComponent);
-    isDirty = false;
-  }
-  setTimeout(reRender, 30);
-}
-setTimeout(reRender, 30);
-
-function render(container, component) {
-  let mainNode = componentToNode(component.render());
-  while (container.firstChild) {
-    container.removeChild(container.firstChild);
-  }
-  container.appendChild(mainNode);
-}
-
-function setEntryComponent(component) {
-  mainComponent = component;
-  isDirty = true;
-}
-
-function insertDynamicLinkings(component, template) {
-  if (typeof template === 'string') {
-    return replaceStringWithProperty(template, component);
-  }
-  let newTemplate = { ...template, props: {}, children: [] };
-  for (let prop in template.props) {
-    let actualProp = prop;
-    if (prop === 'class') {
-      actualProp = 'className';
-    }
-    if (template.props[prop][0] === '{') {
-      let propertyName = template.props[prop].substring(
-        1,
-        template.props[prop].length - 1
+    Object.keys(fields).forEach(key => {
+      string = string.replace(
+        new RegExp(`{${key}}`, 'g'),
+        object.getAttribute(key)
       );
-      newTemplate.props[actualProp] = component.get(propertyName);
-      if (newTemplate.proxy) {
-        newTemplate.proxy.inputs = newTemplate.props;
-      }
-    } else {
-      newTemplate.props[actualProp] = template.props[prop];
-    }
-  }
-  if (template.children) {
-    newTemplate.children = [];
-    for (let child of template.children) {
-      newTemplate.children.push(insertDynamicLinkings(component, child));
-    }
+    });
   }
 
-  if (newTemplate.model) {
-    let actualAmount = newTemplate.children.length;
-    let inputsArray = newTemplate.props['*for'];
-    let neededAmount = inputsArray.length;
-    for (let i = 0; i < neededAmount - actualAmount; i++) {
-      let subTemplate = generateTemplateWithChildObjects({
-        ...newTemplate.model,
-        inputs: { ...newTemplate.props }
-      });
-      template.children.push(subTemplate);
-      newTemplate.children = template.children;
-    }
-    for (let i = 0; i < neededAmount; i++) {
-      newTemplate.children[i].inputs = {
-        ...newTemplate.children[i].inputs,
-        ...inputsArray[i]
-      };
-    }
-    if (neededAmount < actualAmount) {
-      template.children = template.children.slice(0, neededAmount);
-      newTemplate.children = newTemplate.children.slice(0, neededAmount);
-    }
-  }
-
-  return newTemplate;
-}
-
-function replaceStringWithProperty(string, component) {
-  for (let i = 0; i < string.length; i++) {
-    if (string[i] === '{') {
-      let propertyName = string.substring(i + 1, string.indexOf('}', i));
-      string = string.replace(`{${propertyName}}`, component.get(propertyName));
-    }
-  }
   return string;
 }
 
-function generateTemplateWithChildObjects(template) {
-  let generatedTemplate;
-  if (typeof template === 'string') {
-    generatedTemplate = template;
-  } else if (componentsList[template.elementName]) {
-    let element = new componentsList[template.elementName]();
-    element.inputs = { ...template.inputs };
-    element.props = { ...template.props };
-    generatedTemplate = element;
+function getMethodByName(name = '', object) {
+  name = name.substring(1, name.length - 1);
+  return object[name];
+}
+
+function insertFieldsIntoTextNode(node, object) {
+  let text = insertFieldsIntoString(node.text, object);
+  if (node.node.nodeValue !== text) {
+    node.node.nodeValue = text;
+  }
+}
+
+function insertFieldsIntoNodeAttribute(newNode, node, attribute, object) {
+  if (attribute.startsWith('on')) {
+    if (!node.node[attribute]) {
+      newNode.node.removeAttribute(attribute);
+      newNode.node[attribute] = getMethodByName(
+        node.attributes[attribute],
+        object
+      );
+    }
   } else {
-    let newTemplate = { ...template, children: [] };
-    if (template.children) {
-      newTemplate.children = [];
-      for (let child of template.children) {
-        newTemplate.children.push(insertChildObjects(child));
+    newNode.attributes[attribute] = insertFieldsIntoString(
+      node.attributes[attribute],
+      object
+    );
+    if (
+      newNode.node.getAttribute(attribute) !== newNode.attributes[attribute]
+    ) {
+      if (attribute === '*if') {
+        if (newNode.attributes[attribute]) {
+          newNode.placeholder.replaceWith(newNode.node);
+        } else {
+          newNode.node.replaceWith(newNode.placeholder);
+        }
+      } else if (attribute === 'checked') {
+        newNode.node[attribute] = newNode.attributes[attribute];
+      } else {
+        newNode.node.setAttribute(attribute, newNode.attributes[attribute]);
       }
     }
-    generatedTemplate = newTemplate;
   }
-  return generatedTemplate;
 }
 
-function insertChildObjects(template) {
-  for (let prop in template.props) {
-    if (prop === '*for') {
-      return {
-        props: template.props,
-        model: template,
-        children: []
-      };
+function insertFieldsIntoNode(node, object) {
+  let newNode = {
+    ...node,
+    attributes: {},
+    visible: true
+  };
+
+  if (node.text) {
+    insertFieldsIntoTextNode(newNode, object);
+    return;
+  }
+
+  if (node.instance) {
+    newNode.instance.inputs = newNode.attributes;
+  }
+
+  Object.keys(node.attributes).forEach(attribute =>
+    insertFieldsIntoNodeAttribute(newNode, node, attribute, object)
+  );
+
+  newNode.children.forEach(child => addNodeToRenderQueue(child, object));
+}
+
+function addNodeToRenderQueue(node, object) {
+  if (!node) {
+    return;
+  }
+
+  let index = renderQueue.findIndex(element => element.node === node);
+  if (index > -1) {
+    renderQueue[index] = { node, object };
+  } else {
+    renderQueue.push({ node, object });
+  }
+}
+
+function toUpperKebabCase(camelCase = '') {
+  let nameArray = camelCase.split('');
+  for (let i = 1; i < nameArray.length; i++) {
+    if (nameArray[i] >= 'A' && nameArray[i] <= 'Z') {
+      nameArray.splice(i, 1, '-' + nameArray[i]);
     }
   }
-
-  return generateTemplateWithChildObjects(template);
+  return nameArray.join('').toUpperCase();
 }
 
-class Component {
-  inputs = {};
-  template = '';
+function loadComponents(...components) {
+  componentsList = {};
+  components.forEach(component => {
+    componentsList[toUpperKebabCase(component.name)] = component;
+  });
+}
 
-  constructor() {
+function workLoop(deadline) {
+  let thereIsStillTime = true;
+  if (renderQueue.length) {
+    while (renderQueue.length && thereIsStillTime) {
+      let elementToRender = renderQueue.shift();
+      insertFieldsIntoNode(elementToRender.node, elementToRender.object);
+
+      thereIsStillTime = deadline.timeRemaining() > 0;
+    }
+  } else if (firstRender) {
+    firstRender();
+    firstRender = null;
+  }
+
+  requestIdleCallback(workLoop);
+}
+
+requestIdleCallback(workLoop);
+
+class Component {
+  constructor(template) {
+    this.template = html2json(template, componentsList);
+
     this.proxy = new Proxy(this, {
       set(target, name, value) {
         target[name] = value;
-        isDirty = true;
+        addNodeToRenderQueue(target.template, target);
         return true;
       }
     });
@@ -218,16 +196,7 @@ class Component {
     return this.proxy;
   }
 
-  setTemplate(template) {
-    this.template = html2json(template);
-    this.template = insertChildObjects(this.template);
-  }
-
-  render() {
-    return insertDynamicLinkings(this, this.template);
-  }
-
-  get(propertyPath = '') {
+  getAttribute(propertyPath = '') {
     let value = this;
     let properties = propertyPath.split('.');
     for (let property of properties) {
@@ -237,10 +206,4 @@ class Component {
   }
 }
 
-function loadComponents(...components) {
-  for (let component of components) {
-    componentsList[component.name] = component;
-  }
-}
-
-export { Component, setEntryComponent, loadComponents, html2json };
+export { Component, renderIntoBody, loadComponents };
