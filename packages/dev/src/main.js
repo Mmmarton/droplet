@@ -87,9 +87,9 @@ function insertFieldsIntoNodeAttribute(newNode, node, attribute, object) {
     ) {
       if (attribute === '*if') {
         if (newNode.attributes[attribute]) {
-          newNode.node.hidden = false;
+          newNode.placeholder.replaceWith(newNode.node);
         } else {
-          newNode.node.hidden = true;
+          newNode.node.replaceWith(newNode.placeholder);
         }
       } else {
         newNode.node.setAttribute(attribute, newNode.attributes[attribute]);

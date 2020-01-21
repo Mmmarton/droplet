@@ -20,6 +20,9 @@ function createJSONfromDOMnode(node, componentsList) {
     if (node.attributes[key].name.startsWith('on')) {
       node[node.attributes[key].name] = null;
     }
+    if (node.attributes[key].name === '*if') {
+      json.placeholder = document.createTextNode('');
+    }
   });
 
   if (json.component) {
