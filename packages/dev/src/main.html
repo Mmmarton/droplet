@@ -8,10 +8,9 @@
         Show that dot
     </label>
     <box-component content='{counter}' style='color:#928'>some content</box-component>
-    <box-component content='{secretValue}'>some content</box-component>
+    <box-component *if='{showDot}' content='{secretValue}'>some content</box-component>
+    <box-component *if='{showDot}' content='{secretValue}'>some content</box-component>
     <box-component change-test='{changeTest()}'>some content</box-component>
 
-    <div class='dot' *if='{showDot}'>
-        DOT
-    </div>
+    <div>Dummy section</div>
 </div>

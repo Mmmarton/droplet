@@ -5,13 +5,17 @@ import template from './main.html';
 
 let renderQueue = [];
 let componentsList = [];
+let firstRender;
 
 function renderIntoBody(component) {
   let body = document.querySelectorAll('body')[0];
   while (body.firstChild) {
     body.removeChild(body.firstChild);
   }
-  addNodeToRenderQueue(component.template, component, body);
+  firstRender = () => {
+    body.appendChild(component.template.node);
+  };
+  addNodeToRenderQueue(component.template, component, { node: body });
 }
 
 let isSimpleExpression = string =>
@@ -57,83 +61,76 @@ function getMethodByName(name = '', object) {
   return object[name];
 }
 
-function hasNode(parent, node) {
-  for (let key of parent.childNodes.keys()) {
-    if (parent.childNodes[key] === node) {
-      return true;
-    }
+function insertFieldsIntoTextNode(node, object) {
+  let text = insertFieldsIntoString(node.text, object);
+  if (node.node.nodeValue !== text) {
+    node.node.nodeValue = text;
   }
-  return false;
 }
 
-function insertFieldsIntoNode(node, object, parent) {
+function insertFieldsIntoNodeAttribute(newNode, node, attribute, object) {
+  if (attribute.startsWith('on')) {
+    if (!node.node[attribute]) {
+      newNode.node.removeAttribute(attribute);
+      newNode.node[attribute] = getMethodByName(
+        node.attributes[attribute],
+        object
+      );
+    }
+  } else {
+    newNode.attributes[attribute] = insertFieldsIntoString(
+      node.attributes[attribute],
+      object
+    );
+    if (
+      newNode.node.getAttribute(attribute) !== newNode.attributes[attribute]
+    ) {
+      if (attribute === '*if') {
+        if (newNode.attributes[attribute]) {
+          newNode.node.hidden = false;
+        } else {
+          newNode.node.hidden = true;
+        }
+      } else {
+        newNode.node.setAttribute(attribute, newNode.attributes[attribute]);
+      }
+    }
+  }
+}
+
+function insertFieldsIntoNode(node, object) {
   let newNode = {
+    ...node,
     attributes: {},
-    children: [],
-    node: node.node
+    visible: true
   };
 
   if (node.text) {
-    newNode.text = insertFieldsIntoString(node.text, object);
-    if (newNode.node.nodeValue !== newNode.text) {
-      newNode.node.nodeValue = newNode.text;
-    }
-    return newNode;
+    insertFieldsIntoTextNode(newNode, object);
+    return;
   }
-
-  Object.keys(node.attributes).forEach(key => {
-    if (key.startsWith('on')) {
-      if (!node.node[key]) {
-        newNode.node.removeAttribute(key);
-        newNode.node[key] = getMethodByName(node.attributes[key], object);
-      }
-    } else {
-      newNode.attributes[key] = insertFieldsIntoString(
-        node.attributes[key],
-        object
-      );
-      if (newNode.node.getAttribute(key) !== newNode.attributes[key]) {
-        if (key === '*if') {
-          let parentHasNode = hasNode(parent, node.node);
-          if (newNode.attributes[key]) {
-            if (!parentHasNode) {
-              parent.appendChild(node.node);
-            }
-          } else if (parentHasNode) {
-            parent.removeChild(node.node);
-          }
-        } else {
-          newNode.node.setAttribute(key, newNode.attributes[key]);
-        }
-      }
-    }
-  });
 
   if (node.instance) {
-    node.instance.inputs = newNode.attributes;
+    newNode.instance.inputs = newNode.attributes;
   }
 
-  node.children.forEach(child => {
-    addNodeToRenderQueue(child, object, newNode.node);
-  });
+  Object.keys(node.attributes).forEach(attribute =>
+    insertFieldsIntoNodeAttribute(newNode, node, attribute, object)
+  );
 
-  if (parent) {
-    if (!parent.children.length) {
-      parent.appendChild(newNode.node);
-    }
-  }
+  newNode.children.forEach(child => addNodeToRenderQueue(child, object));
 }
 
-function addNodeToRenderQueue(node, object, parent) {
+function addNodeToRenderQueue(node, object) {
   if (!node) {
     return;
   }
 
   let index = renderQueue.findIndex(element => element.node === node);
   if (index > -1) {
-    renderQueue[index] = { node, object, parent };
+    renderQueue[index] = { node, object };
   } else {
-    renderQueue.push({ node, object, parent });
+    renderQueue.push({ node, object });
   }
 }
 
@@ -156,15 +153,16 @@ function loadComponents(...components) {
 
 function workLoop(deadline) {
   let thereIsStillTime = true;
-  while (renderQueue.length && thereIsStillTime) {
-    let elementToRender = renderQueue.shift();
-    insertFieldsIntoNode(
-      elementToRender.node,
-      elementToRender.object,
-      elementToRender.parent
-    );
+  if (renderQueue.length) {
+    while (renderQueue.length && thereIsStillTime) {
+      let elementToRender = renderQueue.shift();
+      insertFieldsIntoNode(elementToRender.node, elementToRender.object);
 
-    thereIsStillTime = deadline.timeRemaining() > 0;
+      thereIsStillTime = deadline.timeRemaining() > 0;
+    }
+  } else if (firstRender) {
+    firstRender();
+    firstRender = null;
   }
 
   requestIdleCallback(workLoop);
