@@ -1,16 +1,11 @@
-<div class='main-container'>
-    <h3>See some boxes</h3>
-    <p>And a counter: {counter} <b class='increase' onclick="{increase}">+</b></p>
-    <p>For testing purposes: {test}</p>
-    <input type="text" onkeyup="{changeSecretValue}" value='{secretValue}'>
-    <label>
-        <input type="checkbox" checked='{showDot}' onchange="{updateShowDot}">
-        Show that dot
+<div>
+    <h1>Hello</h1>
+    <p>some text</p>
+    <label for="showList">
+        <input type="checkbox" checked="{showList}" onchange="{updateCheckbox}" name="showList">
+        Show list
     </label>
-    <box-component content='{counter}' style='color:#928'>some content</box-component>
-    <box-component *if='{showDot}' content='{secretValue}'>some content</box-component>
-    <box-component *if='{showDot}' content='{secretValue}'>some content</box-component>
-    <box-component change-test='{changeTest()}'>some content</box-component>
-
-    <div>Dummy section</div>
+    <ul *if="showList">
+        <li *for="a of as">{a.name}</li>
+    </ul>
 </div>

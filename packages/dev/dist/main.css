@@ -1,58 +1,7 @@
-.box {
+div {
+  background-color: rgba(40, 70, 60, 0.1);
   border: 1px solid green;
-  border-radius: 3px;
   display: inline-block;
-  padding: 3px 5px;
-  margin: 3px;
-  cursor: crosshair;
-}
-
-.box p {
-  margin: 0;
-}
-
-.increase {
-  color: #5b2;
-  border: 1px solid #5b2;
-  background-color: #efd;
-  border-radius: 3px;
-  padding: 0 4px;
-  font-weight: 900;
-  margin-left: 10px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.special {
-  color: teal;
-}
-
-.common {
-  color: darkgoldenrod;
-}
-
-.bullet {
-  display: inline-block;
-  color: #fec;
-  border-radius: 5px;
-  background-color: #471;
-  border: 1px solid #451;
+  margin: 5px;
   padding: 5px;
-  margin-top: 3px;
-}
-
-input[type='text'],
-label {
-  display: block;
-}
-
-.dot {
-  display: inline-block;
-  background-color: #829;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  color: white;
-  line-height: 40px;
-  text-align: center;
 }
