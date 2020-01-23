@@ -1,98 +1,193 @@
-import template from './main.html';
+import appleTemplate from './apple.html';
+import { default as mainTemplate } from './main.html';
 let body = document.querySelectorAll('body')[0];
 
 //-----------------------------html parsing--------------------------------
-function createDOMnodeFromHTML(htmlString) {
+function createDOMNodeFromHTML(htmlString) {
   let div = document.createElement('div');
   div.innerHTML = htmlString;
   return div.firstElementChild;
 }
 
-function createNodefromDOMnode(DOMnode, componentsList) {
+function createNodefromDOMNode(DOMNode, componentsList) {
   let node;
-  if (DOMnode.attributes.hasOwnProperty('*if')) {
-    node = buildIfNode(DOMnode, componentsList);
-  } else if (DOMnode.attributes.hasOwnProperty('*for')) {
-    node = buildForNode(DOMnode, componentsList);
+  if (DOMNode.attributes.hasOwnProperty('*if')) {
+    node = buildIfNode(DOMNode, componentsList);
+  } else if (DOMNode.attributes.hasOwnProperty('*for')) {
+    node = buildForNode(DOMNode, componentsList);
   } else {
-    node = {
-      elementName: DOMnode.nodeName,
-      attributes: {},
-      children: [],
-      DOMnode,
-      component: componentsList[DOMnode.nodeName]
-    };
-
-    Object.keys(DOMnode.attributes).forEach(key => {
-      let attribute = DOMnode.attributes[key];
-      node.attributes[attribute.name] = attribute.value;
-      if (attribute.name.startsWith('on')) {
-        DOMnode[attribute.name] = null;
-      }
-    });
-
-    if (node.component) {
-      node.instance = new node.component();
-      while (node.DOMnode.firstChild) {
-        node.DOMnode.removeChild(node.DOMnode.firstChild);
-      }
-      node.DOMnode.appendChild(node.instance.template.DOMnode);
-    } else {
-      Object.keys(DOMnode.childNodes).forEach(key => {
-        let child = buildChildNode(DOMnode.childNodes[key], componentsList);
-        if (child) {
-          node.children.push(child);
-        }
-      });
-    }
+    node = buildNormalNode(DOMNode, componentsList);
   }
 
   return node;
 }
 
-function buildIfNode(DOMnode, componentsList) {
-  let expression = DOMnode.attributes['*if'].value;
-  DOMnode.removeAttribute('*if');
+function buildNormalNode(DOMNode, componentsList) {
+  let node = {
+    elementName: DOMNode.nodeName,
+    attributes: {},
+    children: [],
+    DOMNode,
+    bufferNode: DOMNode.cloneNode(false),
+    component: componentsList[DOMNode.nodeName]
+  };
+
+  initializeNodeAttributes(node);
+
+  if (node.component) {
+    initializeNodeComponent(node);
+  } else {
+    initializeChildNodes(node, componentsList);
+  }
+
+  return node;
+}
+
+function buildIfNode(DOMNode, componentsList) {
+  let expression = DOMNode.attributes['*if'].value;
+  DOMNode.removeAttribute('*if');
   return {
     elementName: '*if',
     expression,
     active: false,
-    content: createNodefromDOMnode(DOMnode, componentsList)
+    content: createNodefromDOMNode(DOMNode, componentsList)
   };
 }
 
-function buildForNode(DOMnode, componentsList) {
-  let expression = DOMnode.attributes['*for'].value;
-  DOMnode.removeAttribute('*for');
+function buildForNode(DOMNode, componentsList) {
+  let expression = DOMNode.attributes['*for'].value;
+  DOMNode.removeAttribute('*for');
   return {
     elementName: '*for',
     expression,
-    content: createNodefromDOMnode(DOMnode, componentsList),
+    content: createNodefromDOMNode(DOMNode, componentsList),
     elements: {}
   };
 }
 
-function buildChildNode(node, componentsList) {
-  let nodeName = node.nodeName;
+function initializeNodeAttributes(node) {
+  Object.keys(node.DOMNode.attributes).forEach(key => {
+    let attribute = node.DOMNode.attributes[key];
+    node.attributes[attribute.name] = attribute.value;
+    if (attribute.name.startsWith('on')) {
+      node.DOMNode[attribute.name] = null;
+      node.bufferNode[attribute.name] = null;
+    }
+  });
+}
+
+function initializeNodeComponent(node) {
+  node.instance = new node.component();
+  while (node.DOMNode.firstChild) {
+    node.DOMNode.removeChild(node.DOMNode.firstChild);
+  }
+  node.DOMNode.appendChild(node.instance.template.DOMNode);
+  node.bufferNode.appendChild(node.instance.template.bufferNode);
+}
+
+function initializeChildNodes(node, componentsList) {
+  Object.keys(node.DOMNode.childNodes).forEach(key => {
+    let child = buildChildNode(node.DOMNode.childNodes[key], componentsList);
+    if (child) {
+      if (child.bufferNode) {
+        node.bufferNode.appendChild(child.bufferNode);
+      } else if (child.content.bufferNode) {
+        node.bufferNode.appendChild(child.content.bufferNode);
+      }
+      node.children.push(child);
+    }
+  });
+}
+
+function buildChildNode(DOMNode, componentsList) {
+  let nodeName = DOMNode.nodeName;
   if (nodeName === '#text') {
-    let text = node.nodeValue.replace(/(\n|\r)/gm, '').trim();
+    let text = DOMNode.nodeValue.replace(/(\n|\r)/gm, '').trim();
     if (text) {
-      return { text, node };
+      return { text, DOMNode, bufferNode: DOMNode.cloneNode(false) };
     }
   } else if (!nodeName.startsWith('#')) {
-    return createNodefromDOMnode(node, componentsList);
+    return createNodefromDOMNode(DOMNode, componentsList);
   }
   return null;
 }
 
 function html2json(html, componentsList) {
-  return createNodefromDOMnode(createDOMnodeFromHTML(html), componentsList);
+  return createNodefromDOMNode(createDOMNodeFromHTML(html), componentsList);
 }
 
 //----------------------------component logic------------------------------
+let componentsList = {};
 
+function toUpperKebabCase(camelCase = '') {
+  let nameArray = camelCase.split('');
+  for (let i = 1; i < nameArray.length; i++) {
+    if (nameArray[i] >= 'A' && nameArray[i] <= 'Z') {
+      nameArray.splice(i, 1, '-' + nameArray[i]);
+    }
+  }
+  return nameArray.join('').toUpperCase();
+}
 
-console.log(html2json(template, []));
+function loadComponents(...components) {
+  components.forEach(component => {
+    componentsList[toUpperKebabCase(component.name)] = component;
+  });
+}
+
+function createProxy(object) {
+  return new Proxy(object, {
+    set(target, name, value) {
+      target[name] = value;
+      // addNodeToRenderQueue(target.template, target);
+      console.log('component changed');
+      return true;
+    }
+  });
+}
+
+function bindClassMethodsToProxy(object, proxy) {
+  let methods = Object.getOwnPropertyNames(Object.getPrototypeOf(object));
+  methods.forEach(method => {
+    if (typeof object[method] === 'function' && method !== 'constructor') {
+      object[method] = object[method].bind(proxy);
+    }
+  });
+}
+
+class Component {
+  constructor(template) {
+    this.template = html2json(template, componentsList);
+    this.proxy = createProxy(this);
+    bindClassMethodsToProxy(this, this.proxy);
+    return this.proxy;
+  }
+
+  getAttribute(propertyPath = '') {
+    let value = this;
+    let properties = propertyPath.split('.');
+    for (let property of properties) {
+      value = value[property];
+    }
+    return value;
+  }
+}
+
+class Apple extends Component {
+  constructor() {
+    super(appleTemplate);
+  }
+}
+
+class Main extends Component {
+  constructor() {
+    super(mainTemplate);
+  }
+}
+
+loadComponents(Main, Apple);
+body.appendChild(new Main().template.DOMNode);
+body.appendChild(new Main().template.bufferNode);
 
 //----------------------------------keep-----------------------------------
 function getListDiffs(old, current) {
@@ -123,3 +218,5 @@ function getListDiffs(old, current) {
   }
   return { deleted, created };
 }
+
+//--------------------------free stuff-----------------------

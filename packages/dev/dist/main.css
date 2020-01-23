@@ -5,3 +5,8 @@ div {
   margin: 5px;
   padding: 5px;
 }
+
+.title {
+  color: maroon;
+  font-size: 28px;
+}
