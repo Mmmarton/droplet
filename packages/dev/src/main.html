@@ -1,11 +1,7 @@
 <div>
     <h1 class='title'>Hello</h1>
-    <p>some text</p>
-    <p style='color: teal' *if="!showList">additional text</p>
-    <label for="showList">
-        <input type="checkbox" checked="{showList}" onchange="{updateCheckbox}" name="showList">
-        Show list
-    </label>
+    <p prop="{secretValue}">{secretValue}</p>
+    <button onclick="{update}">update</button>
     <ul *if="showList">
         <li *for="a of as">
             <apple content="{a.name}"></apple>

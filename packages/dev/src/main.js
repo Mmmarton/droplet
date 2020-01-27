@@ -116,6 +116,72 @@ function html2json(html, componentsList) {
   return createNodefromDOMNode(createDOMNodeFromHTML(html), componentsList);
 }
 
+//-----------------------------update logic--------------------------------
+let processQueue = new Set();
+let renderQueue = new Set();
+
+function updateNode({ node, object }) {
+  if (node.attributes) {
+    Object.keys(node.attributes).forEach(attribute => {
+      let value = node.attributes[attribute];
+      if (value[0] === '{') {
+        value = value.substring(1, value.length - 1);
+        if (attribute.startsWith('on')) {
+          if (!node.bufferNode[attribute]) {
+            node.bufferNode.removeAttribute(attribute);
+            node.bufferNode[attribute] = object[value];
+            renderQueue.add(node);
+          }
+        } else {
+          if (node.bufferNode.getAttribute(attribute) !== object[value]) {
+            node.bufferNode.setAttribute(attribute, object[value]);
+            renderQueue.add(node);
+          }
+        }
+      }
+    });
+  }
+
+  if (node.children) {
+    node.children.forEach(child => {
+      processQueue.add({
+        node: child,
+        object
+      });
+    });
+  }
+}
+
+function renderNode(node) {
+  console.log(`rendering ${node.elementName}`);
+  let temp = node.DOMNode;
+  node.DOMNode = node.bufferNode;
+  node.bufferNode = temp;
+  node.bufferNode.replaceWith(node.DOMNode);
+}
+
+function workLoop(deadline) {
+  let thereIsStillTime = true;
+  while (processQueue.size && thereIsStillTime) {
+    let elementToProcess = processQueue.entries().next().value[0];
+    processQueue.delete(elementToProcess);
+    updateNode(elementToProcess);
+
+    thereIsStillTime = deadline.timeRemaining() > 0;
+  }
+  while (renderQueue.size && thereIsStillTime) {
+    let elementToRender = renderQueue.entries().next().value[0];
+    renderQueue.delete(elementToRender);
+    renderNode(elementToRender);
+
+    thereIsStillTime = deadline.timeRemaining() > 0;
+  }
+
+  requestIdleCallback(workLoop);
+}
+
+requestIdleCallback(workLoop);
+
 //----------------------------component logic------------------------------
 let componentsList = {};
 
@@ -139,8 +205,10 @@ function createProxy(object) {
   return new Proxy(object, {
     set(target, name, value) {
       target[name] = value;
-      // addNodeToRenderQueue(target.template, target);
-      console.log('component changed');
+      processQueue.add({
+        node: object.template,
+        object
+      });
       return true;
     }
   });
@@ -180,14 +248,22 @@ class Apple extends Component {
 }
 
 class Main extends Component {
+  secretValue = 'Nope';
+
   constructor() {
     super(mainTemplate);
+  }
+
+  update(event) {
+    console.log(event);
+    this.secretValue += '!';
   }
 }
 
 loadComponents(Main, Apple);
-body.appendChild(new Main().template.DOMNode);
-body.appendChild(new Main().template.bufferNode);
+let main = new Main();
+body.appendChild(main.template.DOMNode);
+updateNode({ node: main.template, object: main });
 
 //----------------------------------keep-----------------------------------
 function getListDiffs(old, current) {
