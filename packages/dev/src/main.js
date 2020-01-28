@@ -49,6 +49,7 @@ function buildIfNode(DOMNode, componentsList) {
     elementName: '*if',
     expression,
     active: false,
+    placeholder: document.createTextNode(''),
     content: createNodefromDOMNode(DOMNode, componentsList)
   };
 }
@@ -113,6 +114,40 @@ let processQueue = new Set();
 let renderQueue = new Set();
 
 function updateNode({ node, object }) {
+  if (node.elementName === '*if') {
+    let field = node.expression;
+    let directLogic = false;
+    if (field[0] === '!') {
+      directLogic = true;
+      field = field.substring(1);
+    }
+    console.log(node);
+
+    if (!object.hasOwnProperty(field)) {
+      console.warn(
+        `The field ${field} is not part of the object ${object.constructor.name}. This is porbabbly not what you want.`
+      );
+    }
+
+    let isTrue =
+      typeof object[field] == 'function' ? object[field]() : object[field];
+    if (isTrue == directLogic) {
+      console.log('yay');
+      if (node.oldDOMNode) {
+        node.content.newDOMNode = node.oldDOMNode;
+        node.content.skipChildren = false;
+        renderQueue.add(node.content);
+      }
+    } else {
+      console.log('nay');
+      node.oldDOMNode = node.content.DOMNode;
+      node.content.newDOMNode = node.placeholder;
+      node.content.skipChildren = true;
+      renderQueue.add(node.content);
+    }
+    return;
+  }
+
   if (node.text) {
     let text = insertFieldsIntoString(node.text, object);
     if (node.DOMNode.nodeValue !== text) {
@@ -176,7 +211,7 @@ function insertFieldsIntoString(string = '', object = {}) {
 }
 
 function renderNode(node) {
-  if (node.children) {
+  if (!node.skipChildren && node.children) {
     node.children.forEach(child => {
       node.newDOMNode.appendChild(child.DOMNode);
     });
@@ -280,8 +315,11 @@ class Main extends Component {
   }
 
   update(event) {
-    console.log(event);
     this.secretValue += '!';
+  }
+
+  showValue() {
+    return this.secretValue.length % 2;
   }
 }
 
