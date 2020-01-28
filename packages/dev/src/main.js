@@ -121,7 +121,6 @@ function updateNode({ node, object }) {
       directLogic = true;
       field = field.substring(1);
     }
-    console.log(node);
 
     if (!object.hasOwnProperty(field)) {
       console.warn(
@@ -132,14 +131,12 @@ function updateNode({ node, object }) {
     let isTrue =
       typeof object[field] == 'function' ? object[field]() : object[field];
     if (isTrue == directLogic) {
-      console.log('yay');
       if (node.oldDOMNode) {
         node.content.newDOMNode = node.oldDOMNode;
         node.content.skipChildren = false;
         renderQueue.add(node.content);
       }
     } else {
-      console.log('nay');
       node.oldDOMNode = node.content.DOMNode;
       node.content.newDOMNode = node.placeholder;
       node.content.skipChildren = true;
