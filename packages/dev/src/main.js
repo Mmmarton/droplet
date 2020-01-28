@@ -28,7 +28,6 @@ function buildNormalNode(DOMNode, componentsList) {
     attributes: {},
     children: [],
     DOMNode,
-    bufferNode: DOMNode.cloneNode(false),
     component: componentsList[DOMNode.nodeName]
   };
 
@@ -71,7 +70,6 @@ function initializeNodeAttributes(node) {
     node.attributes[attribute.name] = attribute.value;
     if (attribute.name.startsWith('on')) {
       node.DOMNode[attribute.name] = null;
-      node.bufferNode[attribute.name] = null;
     }
   });
 }
@@ -82,18 +80,12 @@ function initializeNodeComponent(node) {
     node.DOMNode.removeChild(node.DOMNode.firstChild);
   }
   node.DOMNode.appendChild(node.instance.template.DOMNode);
-  node.bufferNode.appendChild(node.instance.template.bufferNode);
 }
 
 function initializeChildNodes(node, componentsList) {
   Object.keys(node.DOMNode.childNodes).forEach(key => {
     let child = buildChildNode(node.DOMNode.childNodes[key], componentsList);
     if (child) {
-      if (child.bufferNode) {
-        node.bufferNode.appendChild(child.bufferNode);
-      } else if (child.content.bufferNode) {
-        node.bufferNode.appendChild(child.content.bufferNode);
-      }
       node.children.push(child);
     }
   });
@@ -104,7 +96,7 @@ function buildChildNode(DOMNode, componentsList) {
   if (nodeName === '#text') {
     let text = DOMNode.nodeValue.replace(/(\n|\r)/gm, '').trim();
     if (text) {
-      return { text, DOMNode, bufferNode: DOMNode.cloneNode(false) };
+      return { text, DOMNode };
     }
   } else if (!nodeName.startsWith('#')) {
     return createNodefromDOMNode(DOMNode, componentsList);
@@ -121,22 +113,32 @@ let processQueue = new Set();
 let renderQueue = new Set();
 
 function updateNode({ node, object }) {
+  if (node.text) {
+    let text = insertFieldsIntoString(node.text, object);
+    if (node.DOMNode.nodeValue !== text) {
+      node.newDOMNode = node.DOMNode.cloneNode(false);
+      node.newDOMNode.nodeValue = text;
+      renderQueue.add(node);
+    }
+    return;
+  }
+
   if (node.attributes) {
     Object.keys(node.attributes).forEach(attribute => {
       let value = node.attributes[attribute];
       if (value[0] === '{') {
         value = value.substring(1, value.length - 1);
         if (attribute.startsWith('on')) {
-          if (!node.bufferNode[attribute]) {
-            node.bufferNode.removeAttribute(attribute);
-            node.bufferNode[attribute] = object[value];
+          if (!node.DOMNode[attribute]) {
+            node.newDOMNode = node.DOMNode.cloneNode(false);
+            node.newDOMNode.removeAttribute(attribute);
+            node.newDOMNode[attribute] = object[value];
             renderQueue.add(node);
           }
-        } else {
-          if (node.bufferNode.getAttribute(attribute) !== object[value]) {
-            node.bufferNode.setAttribute(attribute, object[value]);
-            renderQueue.add(node);
-          }
+        } else if (node.DOMNode.getAttribute(attribute) !== object[value]) {
+          node.newDOMNode = node.DOMNode.cloneNode(false);
+          node.newDOMNode.setAttribute(attribute, object[value]);
+          renderQueue.add(node);
         }
       }
     });
@@ -152,12 +154,35 @@ function updateNode({ node, object }) {
   }
 }
 
+function insertFieldsIntoString(string = '', object = {}) {
+  let sections = string.split('}');
+  let fields = {};
+
+  for (let section of sections) {
+    let field = section.split('{')[1];
+    if (field) {
+      fields[field] = object.getAttribute(field);
+    }
+  }
+
+  Object.keys(fields).forEach(key => {
+    string = string.replace(
+      new RegExp(`{${key}}`, 'g'),
+      object.getAttribute(key)
+    );
+  });
+
+  return string;
+}
+
 function renderNode(node) {
-  console.log(`rendering ${node.elementName}`);
-  let temp = node.DOMNode;
-  node.DOMNode = node.bufferNode;
-  node.bufferNode = temp;
-  node.bufferNode.replaceWith(node.DOMNode);
+  if (node.children) {
+    node.children.forEach(child => {
+      node.newDOMNode.appendChild(child.DOMNode);
+    });
+  }
+  node.DOMNode.replaceWith(node.newDOMNode);
+  node.DOMNode = node.newDOMNode;
 }
 
 function workLoop(deadline) {
@@ -264,6 +289,7 @@ loadComponents(Main, Apple);
 let main = new Main();
 body.appendChild(main.template.DOMNode);
 updateNode({ node: main.template, object: main });
+console.log(main);
 
 //----------------------------------keep-----------------------------------
 function getListDiffs(old, current) {
