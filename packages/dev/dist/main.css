@@ -10,3 +10,11 @@ div {
   color: maroon;
   font-size: 28px;
 }
+
+.even {
+  color: green;
+}
+
+.odd {
+  color: hotpink;
+}

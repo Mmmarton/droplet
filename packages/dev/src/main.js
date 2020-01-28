@@ -48,8 +48,8 @@ function buildIfNode(DOMNode, componentsList) {
   return {
     elementName: '*if',
     expression,
-    active: false,
-    placeholder: document.createTextNode(''),
+    active: null,
+    placeholder: document.createElement('placeholder'),
     content: createNodefromDOMNode(DOMNode, componentsList)
   };
 }
@@ -114,44 +114,17 @@ let processQueue = new Set();
 let renderQueue = new Set();
 
 function updateNode({ node, object }) {
+  let nodeToUpdate = node.DOMNode;
+
   if (node.elementName === '*if') {
-    let field = node.expression;
-    let directLogic = false;
-    if (field[0] === '!') {
-      directLogic = true;
-      field = field.substring(1);
+    updateIfNode(node, object);
+    if (node.active || node.active === null) {
+      updateNode({ node: node.content, object });
     }
-
-    if (!object.hasOwnProperty(field)) {
-      console.warn(
-        `The field ${field} is not part of the object ${object.constructor.name}. This is porbabbly not what you want.`
-      );
-    }
-
-    let isTrue =
-      typeof object[field] == 'function' ? object[field]() : object[field];
-    if (isTrue == directLogic) {
-      if (node.oldDOMNode) {
-        node.content.newDOMNode = node.oldDOMNode;
-        node.content.skipChildren = false;
-        renderQueue.add(node.content);
-      }
-    } else {
-      node.oldDOMNode = node.content.DOMNode;
-      node.content.newDOMNode = node.placeholder;
-      node.content.skipChildren = true;
-      renderQueue.add(node.content);
-    }
-    return;
   }
 
   if (node.text) {
-    let text = insertFieldsIntoString(node.text, object);
-    if (node.DOMNode.nodeValue !== text) {
-      node.newDOMNode = node.DOMNode.cloneNode(false);
-      node.newDOMNode.nodeValue = text;
-      renderQueue.add(node);
-    }
+    updateTextNode(node, object);
     return;
   }
 
@@ -160,15 +133,22 @@ function updateNode({ node, object }) {
       let value = node.attributes[attribute];
       if (value[0] === '{') {
         value = value.substring(1, value.length - 1);
+
+        if (!object.hasOwnProperty(value)) {
+          console.warn(
+            `Possible template issue: the field ${value} is not part of the object ${object.constructor.name}.`
+          );
+        }
+
         if (attribute.startsWith('on')) {
-          if (!node.DOMNode[attribute]) {
-            node.newDOMNode = node.DOMNode.cloneNode(false);
+          if (!nodeToUpdate[attribute]) {
+            node.newDOMNode = nodeToUpdate.cloneNode(false);
             node.newDOMNode.removeAttribute(attribute);
             node.newDOMNode[attribute] = object[value];
             renderQueue.add(node);
           }
-        } else if (node.DOMNode.getAttribute(attribute) !== object[value]) {
-          node.newDOMNode = node.DOMNode.cloneNode(false);
+        } else if (nodeToUpdate.getAttribute(attribute) !== object[value]) {
+          node.newDOMNode = nodeToUpdate.cloneNode(false);
           node.newDOMNode.setAttribute(attribute, object[value]);
           renderQueue.add(node);
         }
@@ -186,6 +166,47 @@ function updateNode({ node, object }) {
   }
 }
 
+function updateIfNode(node, object) {
+  let field = node.expression;
+  let directLogic = false;
+  if (field[0] === '!') {
+    directLogic = true;
+    field = field.substring(1);
+  }
+
+  if (!object.hasOwnProperty(field)) {
+    console.warn(
+      `Possible template issue: the field ${field} is not part of the object ${object.constructor.name}.`
+    );
+  }
+
+  let isTrue =
+    typeof object[field] == 'function' ? object[field]() : object[field];
+  if (isTrue == directLogic) {
+    if (node.oldDOMNode && node.active !== true) {
+      node.active = true;
+      node.content.newDOMNode = node.oldDOMNode;
+      node.content.skipChildren = false;
+      renderQueue.add(node.content);
+    }
+  } else if (node.active !== false) {
+    node.active = false;
+    node.oldDOMNode = node.content.DOMNode;
+    node.content.newDOMNode = node.placeholder;
+    node.content.skipChildren = true;
+    renderQueue.add(node.content);
+  }
+}
+
+function updateTextNode(node, object) {
+  let text = insertFieldsIntoString(node.text, object);
+  if (node.DOMNode.nodeValue !== text) {
+    node.newDOMNode = node.DOMNode.cloneNode(false);
+    node.newDOMNode.nodeValue = text;
+    renderQueue.add(node);
+  }
+}
+
 function insertFieldsIntoString(string = '', object = {}) {
   let sections = string.split('}');
   let fields = {};
@@ -193,6 +214,12 @@ function insertFieldsIntoString(string = '', object = {}) {
   for (let section of sections) {
     let field = section.split('{')[1];
     if (field) {
+      if (!object.hasOwnProperty(field)) {
+        console.warn(
+          `Possible template issue: the field ${field} is not part of the object ${object.constructor.name}.`
+        );
+      }
+
       fields[field] = object.getAttribute(field);
     }
   }
@@ -306,6 +333,8 @@ class Apple extends Component {
 
 class Main extends Component {
   secretValue = 'Nope';
+  evenodd = 'even';
+  count = 0;
 
   constructor() {
     super(mainTemplate);
@@ -313,10 +342,16 @@ class Main extends Component {
 
   update(event) {
     this.secretValue += '!';
+    this.count++;
   }
 
   showValue() {
     return this.secretValue.length % 2;
+  }
+
+  changeColor() {
+    this.evenodd = this.evenodd === 'even' ? 'odd' : 'even';
+    this.count++;
   }
 }
 
