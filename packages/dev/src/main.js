@@ -179,9 +179,9 @@ function updateNodeAttributes(node, object) {
 
 function updateIfNode(node, object) {
   let field = node.expression;
-  let directLogic = false;
+  let directLogic = true;
   if (field[0] === '!') {
-    directLogic = true;
+    directLogic = false;
     field = field.substring(1);
   }
 
@@ -345,26 +345,18 @@ class Apple extends Component {
 
 class Main extends Component {
   count = 0;
+  as = [];
 
   constructor() {
     super(mainTemplate);
   }
 
-  increase() {
-    this.count++;
+  isOdd() {
+    return this.count % 2;
   }
 
-  contentChange(amount) {
-    this.count -= amount;
-  }
-
-  multipleCount() {
-    return this.count * 2;
-  }
-
-  evenOdd() {
-    console.log('yah');
-    return this.count % 2 ? 'odd' : 'even';
+  addA() {
+    this.as.push(this.count++);
   }
 }
 

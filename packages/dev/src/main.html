@@ -1,6 +1,8 @@
-<div>
+<div style="width: 130px">
     <h1 class='title'>Hello</h1>
-    <p class='{evenOdd()}'>{count} - {multipleCount}</p>
-    <button onclick="{increase}">Increase</button>
-    <apple style='color: blue' content='{count}' content-change='{contentChange}'></apple>
+    <p>Elements: {count} <span *if="isOdd">Odd</span></p>
+    <button onclick="{addA}">Add A</button>
+    <p *for="a of as">
+        <div>aha</div>
+    </p>
 </div>
