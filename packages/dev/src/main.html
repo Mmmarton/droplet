@@ -1,16 +1,5 @@
 <div>
     <h1 class='title'>Hello</h1>
-    <p prop="{secretValue}">pup {secretValue} <button onclick="{update}">update</button></p>
-    <button onclick="{changeColor}">Change color</button>
-    <span class="{evenodd}" *if="showValue">
-        <div>EVEN {count}</div>
-    </span>
-    <span *if="!showValue">
-        <div>ODD <span class="{evenodd}">2</span></div>
-    </span>
-    <ul>
-        <li *for="a of as">
-            <apple content="{a}"></apple>
-        </li>
-    </ul>
+    <button onclick="{increase}">Increase</button>
+    <apple style='color: blue' content='{count}' content-change='{contentChange}'></apple>
 </div>

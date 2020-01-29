@@ -81,6 +81,7 @@ function initializeNodeComponent(node) {
     node.DOMNode.removeChild(node.DOMNode.firstChild);
   }
   node.DOMNode.appendChild(node.instance.template.DOMNode);
+  node.children.push(node.instance.template);
 }
 
 function initializeChildNodes(node, componentsList) {
@@ -114,8 +115,6 @@ let processQueue = new Set();
 let renderQueue = new Set();
 
 function updateNode({ node, object }) {
-  let nodeToUpdate = node.DOMNode;
-
   if (node.elementName === '*if') {
     updateIfNode(node, object);
     if (node.active || node.active === null) {
@@ -129,31 +128,7 @@ function updateNode({ node, object }) {
   }
 
   if (node.attributes) {
-    Object.keys(node.attributes).forEach(attribute => {
-      let value = node.attributes[attribute];
-      if (value[0] === '{') {
-        value = value.substring(1, value.length - 1);
-
-        if (!object.hasOwnProperty(value)) {
-          console.warn(
-            `Possible template issue: the field ${value} is not part of the object ${object.constructor.name}.`
-          );
-        }
-
-        if (attribute.startsWith('on')) {
-          if (!nodeToUpdate[attribute]) {
-            node.newDOMNode = nodeToUpdate.cloneNode(false);
-            node.newDOMNode.removeAttribute(attribute);
-            node.newDOMNode[attribute] = object[value];
-            renderQueue.add(node);
-          }
-        } else if (nodeToUpdate.getAttribute(attribute) !== object[value]) {
-          node.newDOMNode = nodeToUpdate.cloneNode(false);
-          node.newDOMNode.setAttribute(attribute, object[value]);
-          renderQueue.add(node);
-        }
-      }
-    });
+    object = updateNodeAttributes(node, object);
   }
 
   if (node.children) {
@@ -164,6 +139,37 @@ function updateNode({ node, object }) {
       });
     });
   }
+}
+
+function updateNodeAttributes(node, object) {
+  Object.keys(node.attributes).forEach(attribute => {
+    let value = node.attributes[attribute];
+    if (value[0] === '{') {
+      value = value.substring(1, value.length - 1);
+
+      if (attribute.startsWith('on')) {
+        if (!node.DOMNode[attribute]) {
+          node.newDOMNode = node.DOMNode.cloneNode(false);
+          node.newDOMNode.removeAttribute(attribute);
+          node.newDOMNode[attribute] = object[value];
+          renderQueue.add(node);
+        }
+      } else if (node.DOMNode.getAttribute(attribute) !== object[value]) {
+        node.newDOMNode = node.DOMNode.cloneNode(false);
+        node.newDOMNode.setAttribute(attribute, object[value]);
+        renderQueue.add(node);
+      }
+
+      if (node.component) {
+        node.instance.inputs[attribute] = object.getAttribute(value);
+      }
+    }
+  });
+
+  if (node.component) {
+    object = node.instance;
+  }
+  return object;
 }
 
 function updateIfNode(node, object) {
@@ -214,12 +220,6 @@ function insertFieldsIntoString(string = '', object = {}) {
   for (let section of sections) {
     let field = section.split('{')[1];
     if (field) {
-      if (!object.hasOwnProperty(field)) {
-        console.warn(
-          `Possible template issue: the field ${field} is not part of the object ${object.constructor.name}.`
-        );
-      }
-
       fields[field] = object.getAttribute(field);
     }
   }
@@ -308,6 +308,7 @@ function bindClassMethodsToProxy(object, proxy) {
 }
 
 class Component {
+  inputs = {};
   constructor(template) {
     this.template = html2json(template, componentsList);
     this.proxy = createProxy(this);
@@ -318,9 +319,11 @@ class Component {
   getAttribute(propertyPath = '') {
     let value = this;
     let properties = propertyPath.split('.');
+
     for (let property of properties) {
       value = value[property];
     }
+
     return value;
   }
 }
@@ -329,29 +332,25 @@ class Apple extends Component {
   constructor() {
     super(appleTemplate);
   }
+
+  decrease() {
+    this.inputs['content-change'](2);
+  }
 }
 
 class Main extends Component {
-  secretValue = 'Nope';
-  evenodd = 'even';
   count = 0;
 
   constructor() {
     super(mainTemplate);
   }
 
-  update(event) {
-    this.secretValue += '!';
+  increase() {
     this.count++;
   }
 
-  showValue() {
-    return this.secretValue.length % 2;
-  }
-
-  changeColor() {
-    this.evenodd = this.evenodd === 'even' ? 'odd' : 'even';
-    this.count++;
+  contentChange(amount) {
+    this.count -= amount;
   }
 }
 
