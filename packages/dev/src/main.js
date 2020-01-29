@@ -146,22 +146,27 @@ function updateNodeAttributes(node, object) {
     let value = node.attributes[attribute];
     if (value[0] === '{') {
       value = value.substring(1, value.length - 1);
+      if (value[value.length - 1] === ')') {
+        value = object[value.substring(0, value.length - 2)]();
+      } else {
+        value = object.getAttribute(value);
+      }
 
       if (attribute.startsWith('on')) {
         if (!node.DOMNode[attribute]) {
           node.newDOMNode = node.DOMNode.cloneNode(false);
           node.newDOMNode.removeAttribute(attribute);
-          node.newDOMNode[attribute] = object[value];
+          node.newDOMNode[attribute] = value;
           renderQueue.add(node);
         }
-      } else if (node.DOMNode.getAttribute(attribute) !== object[value]) {
+      } else if (node.DOMNode.getAttribute(attribute) !== value) {
         node.newDOMNode = node.DOMNode.cloneNode(false);
-        node.newDOMNode.setAttribute(attribute, object[value]);
+        node.newDOMNode.setAttribute(attribute, value);
         renderQueue.add(node);
       }
 
       if (node.component) {
-        node.instance.inputs[attribute] = object.getAttribute(value);
+        node.instance.inputs[attribute] = value;
       }
     }
   });
@@ -351,6 +356,15 @@ class Main extends Component {
 
   contentChange(amount) {
     this.count -= amount;
+  }
+
+  multipleCount() {
+    return this.count * 2;
+  }
+
+  evenOdd() {
+    console.log('yah');
+    return this.count % 2 ? 'odd' : 'even';
   }
 }
 
