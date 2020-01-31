@@ -45,24 +45,31 @@ function buildNormalNode(DOMNode, componentsList) {
 function buildIfNode(DOMNode, componentsList) {
   let expression = DOMNode.attributes['*if'].value;
   DOMNode.removeAttribute('*if');
-  return {
+  let node = {
     elementName: '*if',
     expression,
     active: null,
-    placeholder: document.createElement('placeholder'),
+    placeholder: document.createTextNode(''),
     content: createNodefromDOMNode(DOMNode, componentsList)
   };
+
+  DOMNode.replaceWith(node.placeholder);
+  return node;
 }
 
 function buildForNode(DOMNode, componentsList) {
   let expression = DOMNode.attributes['*for'].value;
   DOMNode.removeAttribute('*for');
-  return {
+  let node = {
     elementName: '*for',
     expression,
-    content: createNodefromDOMNode(DOMNode, componentsList),
-    elements: {}
+    elements: {},
+    placeholder: document.createTextNode(''),
+    content: createNodefromDOMNode(DOMNode, componentsList)
   };
+
+  DOMNode.replaceWith(node.placeholder);
+  return node;
 }
 
 function initializeNodeAttributes(node) {
@@ -114,12 +121,24 @@ function html2json(html, componentsList) {
 let processQueue = new Set();
 let renderQueue = new Set();
 
+function getObjectAttribute(object, attribute) {
+  let value = object;
+  let properties = attribute.split('.');
+
+  for (let property of properties) {
+    value = value[property];
+  }
+
+  return value;
+}
+
 function updateNode({ node, object }) {
   if (node.elementName === '*if') {
     updateIfNode(node, object);
-    if (node.active || node.active === null) {
-      updateNode({ node: node.content, object });
-    }
+  }
+
+  if (node.elementName === '*for') {
+    updateForNode(node, object);
   }
 
   if (node.text) {
@@ -149,7 +168,7 @@ function updateNodeAttributes(node, object) {
       if (value[value.length - 1] === ')') {
         value = object[value.substring(0, value.length - 2)]();
       } else {
-        value = object.getAttribute(value);
+        value = getObjectAttribute(object, value);
       }
 
       if (attribute.startsWith('on')) {
@@ -159,7 +178,7 @@ function updateNodeAttributes(node, object) {
           node.newDOMNode[attribute] = value;
           renderQueue.add(node);
         }
-      } else if (node.DOMNode.getAttribute(attribute) !== value) {
+      } else if (getObjectAttribute(node.DOMNode, attribute) !== value) {
         node.newDOMNode = node.DOMNode.cloneNode(false);
         node.newDOMNode.setAttribute(attribute, value);
         renderQueue.add(node);
@@ -177,6 +196,38 @@ function updateNodeAttributes(node, object) {
   return object;
 }
 
+function updateForNode(node, object) {
+  let [iterator, list] = node.expression.split(' of ');
+
+  let objectAttribute = getObjectAttribute(object, list);
+  list =
+    typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
+  node.list = list;
+
+  console.log(node);
+  for (let i = 0; i < list.length; i++) {
+    // if
+  }
+}
+
+function duplicateNode(content, parentNode) {
+  let newContent = {
+    ...content,
+    children: [],
+    DOMNode: content.DOMNode.cloneNode(false),
+    newDOMNode: content.DOMNode.cloneNode(false)
+  };
+  if (parentNode) {
+    parentNode.appendChild(newContent.DOMNode);
+  }
+  if (content.children) {
+    newContent.children = content.children.map(child =>
+      duplicateNode(child, newContent.DOMNode)
+    );
+  }
+  return newContent;
+}
+
 function updateIfNode(node, object) {
   let field = node.expression;
   let directLogic = true;
@@ -191,8 +242,9 @@ function updateIfNode(node, object) {
     );
   }
 
+  let objectAttribute = getObjectAttribute(object, field);
   let isTrue =
-    typeof object[field] == 'function' ? object[field]() : object[field];
+    typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   if (isTrue == directLogic) {
     if (node.oldDOMNode && node.active !== true) {
       node.active = true;
@@ -206,6 +258,10 @@ function updateIfNode(node, object) {
     node.content.newDOMNode = node.placeholder;
     node.content.skipChildren = true;
     renderQueue.add(node.content);
+  }
+
+  if (node.active || node.active === null) {
+    updateNode({ node: node.content, object });
   }
 }
 
@@ -225,14 +281,14 @@ function insertFieldsIntoString(string = '', object = {}) {
   for (let section of sections) {
     let field = section.split('{')[1];
     if (field) {
-      fields[field] = object.getAttribute(field);
+      fields[field] = getObjectAttribute(object, field);
     }
   }
 
   Object.keys(fields).forEach(key => {
     string = string.replace(
       new RegExp(`{${key}}`, 'g'),
-      object.getAttribute(key)
+      getObjectAttribute(object, key)
     );
   });
 
@@ -240,13 +296,20 @@ function insertFieldsIntoString(string = '', object = {}) {
 }
 
 function renderNode(node) {
-  if (!node.skipChildren && node.children) {
-    node.children.forEach(child => {
-      node.newDOMNode.appendChild(child.DOMNode);
-    });
+  if (node.toBeDeleted) {
+    node.DOMNode.remove();
+  } else if (node.insertAfterNode) {
+    node.insertAfterNode.DOMNode.after(node.DOMNode);
+    node.insertAfterNode = null;
+  } else {
+    if (!node.skipChildren && node.children) {
+      node.children.forEach(child => {
+        node.newDOMNode.appendChild(child.DOMNode);
+      });
+    }
+    node.DOMNode.replaceWith(node.newDOMNode);
+    node.DOMNode = node.newDOMNode;
   }
-  node.DOMNode.replaceWith(node.newDOMNode);
-  node.DOMNode = node.newDOMNode;
 }
 
 function workLoop(deadline) {
@@ -320,17 +383,6 @@ class Component {
     bindClassMethodsToProxy(this, this.proxy);
     return this.proxy;
   }
-
-  getAttribute(propertyPath = '') {
-    let value = this;
-    let properties = propertyPath.split('.');
-
-    for (let property of properties) {
-      value = value[property];
-    }
-
-    return value;
-  }
 }
 
 class Apple extends Component {
@@ -346,9 +398,14 @@ class Apple extends Component {
 class Main extends Component {
   count = 0;
   as = [];
+  something = 0;
 
   constructor() {
     super(mainTemplate);
+  }
+
+  length() {
+    return this.as.length;
   }
 
   isOdd() {
@@ -358,12 +415,20 @@ class Main extends Component {
   addA() {
     this.as.push(this.count++);
   }
+
+  removeA() {
+    this.as.pop();
+    this.as = [...this.as];
+  }
+
+  changeSomething() {
+    this.something = Math.floor(Math.random() * 90 + 10);
+  }
 }
 
 loadComponents(Main, Apple);
 let main = new Main();
 body.appendChild(main.template.DOMNode);
-updateNode({ node: main.template, object: main });
 console.log(main);
 
 //----------------------------------keep-----------------------------------

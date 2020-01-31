@@ -1,8 +1,18 @@
-<div style="width: 130px">
+<div style="width: 300px">
     <h1 class='title'>Hello</h1>
-    <p>Elements: {count} <span *if="isOdd">Odd</span></p>
+    <p>Elements: {length}, Something: {something}</p>
     <button onclick="{addA}">Add A</button>
-    <p *for="a of as">
-        <div>aha</div>
-    </p>
+    <button onclick="{changeSomething}">Change something</button>
+    <button onclick="{removeA}">Remove A</button>
+    <hr>
+    <div class='container' *for="a of as">
+        <div>aha {something} {index}</div>
+    </div>
+    <hr>
+    <span *if="isOdd">
+        <div>Odd</div>
+    </span>
+    <span *if="!isOdd">
+        <div>Even</div>
+    </span>
 </div>

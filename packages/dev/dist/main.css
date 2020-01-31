@@ -6,6 +6,11 @@ div {
   padding: 5px;
 }
 
+.container {
+  background-color: rgba(70, 40, 60, 0.1);
+  border: 1px solid red;
+}
+
 .title {
   color: maroon;
   font-size: 28px;
