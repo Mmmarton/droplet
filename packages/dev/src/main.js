@@ -63,7 +63,7 @@ function buildForNode(DOMNode, componentsList) {
   let node = {
     elementName: '*for',
     expression,
-    elements: {},
+    elements: [],
     placeholder: document.createTextNode(''),
     content: createNodefromDOMNode(DOMNode, componentsList)
   };
@@ -203,11 +203,51 @@ function updateForNode(node, object) {
   list =
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   node.list = list;
+  // console.log(node);
 
-  console.log(node);
-  for (let i = 0; i < list.length; i++) {
-    // if
+  let i = 0;
+  let j = 0;
+  let lastFound = 0;
+  let elements = [];
+  let oldCount = node.elements.length;
+  while (i < list.length) {
+    let wasFound = false;
+    while (j < node.elements.length && !wasFound) {
+      if (list[i] === node.elements[j].key) {
+        wasFound = true;
+      } else {
+        j++;
+      }
+    }
+
+    if (wasFound) {
+      // update the node
+      let deletes = node.elements.slice(lastFound, j);
+      if (deletes.length) {
+        console.log(`[${deletes.map(k => k.key).join()}] were deleted`);
+      }
+      lastFound = ++j;
+      console.log(`${list[i]} was found`);
+    } else {
+      // create it
+      console.log(`${list[i]} is new`);
+      j = lastFound;
+    }
+    elements.push({ key: list[i] });
+
+    i++;
   }
+
+  let leftoverCount = oldCount - lastFound;
+  let deletes = node.elements.slice(node.elements.length - leftoverCount);
+  if (deletes.length) {
+    console.log(`[${deletes.map(k => k.key).join()}] were deleted`);
+  }
+
+  node.elements = elements;
+  console.log('-----------------------------------');
+
+  //clean the leftovers
 }
 
 function duplicateNode(content, parentNode) {
@@ -399,6 +439,12 @@ class Main extends Component {
   count = 0;
   as = [];
   something = 0;
+  test = [
+    [1, 2, 3, 4, 5],
+    [1, 7, 9, 2, 4],
+    [3, 9, 7, 2, 1, 4, 0],
+    [1, 1, 1, 1]
+  ];
 
   constructor() {
     super(mainTemplate);
@@ -413,11 +459,12 @@ class Main extends Component {
   }
 
   addA() {
-    this.as.push(this.count++);
+    this.as = this.test[this.count];
+    this.count = (this.count + 1) % 4;
   }
 
   removeA() {
-    this.as.pop();
+    this.as.splice(Math.floor(Math.random() * this.as.length), 1);
     this.as = [...this.as];
   }
 
