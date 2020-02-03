@@ -203,57 +203,74 @@ function updateForNode(node, object) {
   list =
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   node.list = list;
-  // console.log(node);
 
+  let { elements, updates, deletions, creations } = getNewElementsWithDiffs(
+    node.elements,
+    list
+  );
+
+  node.elements = elements;
+
+  //updates
+  if (updates.length) {
+    console.log({ updates });
+  }
+
+  //deletions
+  if (deletions.length) {
+    console.log({ deletions });
+  }
+
+  //creations
+  if (creations.length) {
+    console.log({ creations });
+  }
+
+  console.log('-----------------------------------');
+
+  //clean the leftovers
+}
+
+function getNewElementsWithDiffs(nodeElements, newList) {
   let i = 0;
   let j = 0;
   let lastFound = 0;
   let elements = [];
-  let oldCount = node.elements.length;
   let deletions = [];
-  while (i < list.length) {
-    let wasFound = false;
-    while (j < node.elements.length && !wasFound) {
-      if (list[i] === node.elements[j].key) {
-        wasFound = true;
+  let updates = [];
+  let creations = [];
+  while (i < newList.length) {
+    let targetElement = false;
+    while (j < nodeElements.length && !targetElement) {
+      if (newList[i] === nodeElements[j].key) {
+        targetElement = nodeElements[j];
       } else {
         j++;
       }
     }
 
-    if (wasFound) {
-      // update the node
-      let deletedElements = node.elements.slice(lastFound, j);
+    if (targetElement) {
+      let deletedElements = nodeElements.slice(lastFound, j);
       if (deletedElements.length) {
         deletions.push(...deletedElements);
       }
       lastFound = ++j;
-      console.log(`${list[i]} was found`);
+      updates.push(targetElement);
     } else {
-      // create it
-      console.log(`${list[i]} is new`);
+      creations.push(newList[i]);
       j = lastFound;
     }
-    elements.push({ key: list[i] });
+    elements.push({ key: newList[i] });
 
     i++;
   }
 
-  let leftoverCount = oldCount - lastFound;
-  let deletedElements = node.elements.slice(
-    node.elements.length - leftoverCount
-  );
+  let deletedElements = nodeElements.slice(lastFound);
   if (deletedElements.length) {
     deletions.push(...deletedElements);
   }
-  if (deletions.length) {
-    console.log({ deletions });
-  }
 
-  node.elements = elements;
-  console.log('-----------------------------------');
-
-  //clean the leftovers
+  return { elements, updates, deletions, creations };
 }
 
 function duplicateNode(content, parentNode) {
