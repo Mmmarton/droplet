@@ -210,6 +210,7 @@ function updateForNode(node, object) {
   let lastFound = 0;
   let elements = [];
   let oldCount = node.elements.length;
+  let deletions = [];
   while (i < list.length) {
     let wasFound = false;
     while (j < node.elements.length && !wasFound) {
@@ -222,9 +223,9 @@ function updateForNode(node, object) {
 
     if (wasFound) {
       // update the node
-      let deletes = node.elements.slice(lastFound, j);
-      if (deletes.length) {
-        console.log(`[${deletes.map(k => k.key).join()}] were deleted`);
+      let deletedElements = node.elements.slice(lastFound, j);
+      if (deletedElements.length) {
+        deletions.push(...deletedElements);
       }
       lastFound = ++j;
       console.log(`${list[i]} was found`);
@@ -239,9 +240,14 @@ function updateForNode(node, object) {
   }
 
   let leftoverCount = oldCount - lastFound;
-  let deletes = node.elements.slice(node.elements.length - leftoverCount);
-  if (deletes.length) {
-    console.log(`[${deletes.map(k => k.key).join()}] were deleted`);
+  let deletedElements = node.elements.slice(
+    node.elements.length - leftoverCount
+  );
+  if (deletedElements.length) {
+    deletions.push(...deletedElements);
+  }
+  if (deletions.length) {
+    console.log({ deletions });
   }
 
   node.elements = elements;
