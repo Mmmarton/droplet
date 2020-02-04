@@ -204,7 +204,7 @@ function updateForNode(node, object) {
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   node.list = list;
 
-  let deletions = updateElements(node.elements, list);
+  let { deletions, additions } = updateElements(node.elements, list);
 
   let pointer = node.elements;
   while (pointer) {
@@ -217,12 +217,18 @@ function updateForNode(node, object) {
     console.log({ deletions });
   }
 
+  //additions
+  if (additions.length) {
+    console.log({ additions });
+  }
+
   console.log('-----------------------------------');
 }
 
 function updateElements(rootElement, list) {
   let i = 0;
   let deletions = [];
+  let additions = [];
   while (i < list.length) {
     let pointer = rootElement;
     let inBetween = [];
@@ -237,9 +243,19 @@ function updateElements(rootElement, list) {
       rootElement.next = pointer;
       rootElement = pointer;
     } else {
-      let newElement = { content: 'NEW', key: list[i], next: rootElement.next };
+      let newElement = { key: list[i], next: rootElement.next };
+      let alreadyExistingElementIndex = deletions.findIndex(
+        element => element.key === list[i]
+      );
+      if (alreadyExistingElementIndex > -1) {
+        newElement.content = deletions.splice(
+          alreadyExistingElementIndex,
+          1
+        )[0].content;
+      }
       rootElement.next = newElement;
       rootElement = newElement;
+      additions.push(newElement);
     }
     i++;
   }
@@ -255,7 +271,7 @@ function updateElements(rootElement, list) {
   }
   rootElement.next = null;
 
-  return deletions;
+  return { deletions, additions };
 }
 
 function duplicateNode(content, parentNode) {
