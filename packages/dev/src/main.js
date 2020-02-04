@@ -215,37 +215,54 @@ function updateForNode(node, object) {
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   node.list = list;
 
-  let { updates, deletions, additions } = updateElements(node.elements, list);
+  let { updates, deletions, additions } = updateForLoopElements(
+    node.elements,
+    list
+  );
 
   printLinkedList(node.elements);
 
-  //updates
-  if (updates.length) {
-    console.log({ updates });
+  //add the stuff
+  for (let i = additions.length - 1; i >= 0; i--) {
+    if (additions[i].content.insertAfterNode) {
+      additions[i].content.insertAfterNode =
+        additions[i].content.insertAfterNode.DOMNode;
+    } else {
+      additions[i].content.insertAfterNode = node.placeholder;
+    }
+    if (!additions[i].content.DOMNode) {
+      additions[i].content = {
+        ...additions[i].content,
+        // merge with for variables
+        ...duplicateNode(node.content)
+      };
+      renderQueue.add(additions[i].content);
+    }
   }
 
-  //deletions
-  if (deletions.length) {
-    console.log({ deletions });
+  for (let i = 0; i < deletions.length; i++) {
+    deletions[i].content.toBeDeleted = true;
+    renderQueue.add(deletions[i].content);
   }
 
-  //additions
-  if (additions.length) {
-    console.log({ additions });
+  for (let i = 0; i < updates.length; i++) {
+    console.log({ ...node.content, [iterator]: updates[i].key });
+    updateNode({
+      node: updates[i].content,
+      object: { ...node.content, [iterator]: updates[i].key }
+    });
   }
-
-  console.log('-----------------------------------');
 }
 
-function updateElements(elementPointer, list) {
+function updateForLoopElements(elementPointer, list) {
   let i = 0;
   let updates = [];
   let deletions = [];
   let additions = [];
   let lastExistingElement = elementPointer;
   while (i < list.length) {
-    let searchPointer = elementPointer;
-    let inBetween = [];
+    let inBetween = [elementPointer];
+    let searchPointer = elementPointer.next;
     while (searchPointer && searchPointer.key !== list[i]) {
       inBetween.push(searchPointer);
       searchPointer = searchPointer.next;
@@ -262,7 +279,7 @@ function updateElements(elementPointer, list) {
       let newElement = {
         key: list[i],
         next: elementPointer.next,
-        content: { insertAfterNode: lastExistingElement.key }
+        content: { insertAfterNode: lastExistingElement.content }
       };
       let alreadyExistingElementIndex = deletions.findIndex(
         element => element.key === list[i]
@@ -280,8 +297,8 @@ function updateElements(elementPointer, list) {
     i++;
   }
 
-  let searchPointer = elementPointer;
-  let inBetween = [];
+  let inBetween = [elementPointer];
+  let searchPointer = elementPointer.next;
   while (searchPointer && searchPointer.key !== list[i]) {
     inBetween.push(searchPointer);
     searchPointer = searchPointer.next;
@@ -382,8 +399,9 @@ function insertFieldsIntoString(string = '', object = {}) {
 function renderNode(node) {
   if (node.toBeDeleted) {
     node.DOMNode.remove();
+    node.toBeDeleted = false;
   } else if (node.insertAfterNode) {
-    node.insertAfterNode.DOMNode.after(node.DOMNode);
+    node.insertAfterNode.after(node.DOMNode);
     node.insertAfterNode = null;
   } else {
     if (!node.skipChildren && node.children) {
@@ -485,9 +503,13 @@ class Main extends Component {
   something = 0;
   test = [
     [1, 2, 3, 4, 5],
-    [1, 7, 9, 2, 4],
-    [3, 9, 7, 2, 1, 4, 0],
-    [1, 1, 1, 1]
+    [1, 7, 3, 4, 5],
+    [1, 7, 9, 3, 4, 5],
+    [1, 7, 8, 9, 3, 4, 5],
+    [1, 2, 3, 4, 5, 7, 8, 9],
+    [1, 2, 5, 6, 7, 7, 8, 9],
+    [1, 2, 7, 3, 4, 5, 8, 9],
+    [1, 2, 3, 4, 5, 8, 9]
   ];
 
   constructor() {
@@ -504,7 +526,7 @@ class Main extends Component {
 
   addA() {
     this.as = this.test[this.count];
-    this.count = (this.count + 1) % 4;
+    this.count = (this.count + 1) % 8;
   }
 
   removeA() {
