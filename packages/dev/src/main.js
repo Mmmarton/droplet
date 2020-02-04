@@ -63,7 +63,7 @@ function buildForNode(DOMNode, componentsList) {
   let node = {
     elementName: '*for',
     expression,
-    elements: [],
+    elements: {},
     placeholder: document.createTextNode(''),
     content: createNodefromDOMNode(DOMNode, componentsList)
   };
@@ -204,16 +204,12 @@ function updateForNode(node, object) {
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   node.list = list;
 
-  let { elements, updates, deletions, creations } = getNewElementsWithDiffs(
-    node.elements,
-    list
-  );
+  let deletions = updateElements(node.elements, list);
 
-  node.elements = elements;
-
-  //updates
-  if (updates.length) {
-    console.log({ updates });
+  let pointer = node.elements;
+  while (pointer) {
+    console.log(pointer);
+    pointer = pointer.next;
   }
 
   //deletions
@@ -221,56 +217,45 @@ function updateForNode(node, object) {
     console.log({ deletions });
   }
 
-  //creations
-  if (creations.length) {
-    console.log({ creations });
-  }
-
   console.log('-----------------------------------');
-
-  //clean the leftovers
 }
 
-function getNewElementsWithDiffs(nodeElements, newList) {
+function updateElements(rootElement, list) {
   let i = 0;
-  let j = 0;
-  let lastFound = 0;
-  let elements = [];
   let deletions = [];
-  let updates = [];
-  let creations = [];
-  while (i < newList.length) {
-    let targetElement = false;
-    while (j < nodeElements.length && !targetElement) {
-      if (newList[i] === nodeElements[j].key) {
-        targetElement = nodeElements[j];
-      } else {
-        j++;
-      }
+  while (i < list.length) {
+    let pointer = rootElement;
+    let inBetween = [];
+    while (pointer && pointer.key !== list[i]) {
+      inBetween.push(pointer);
+      pointer = pointer.next;
     }
-
-    if (targetElement) {
-      let deletedElements = nodeElements.slice(lastFound, j);
-      if (deletedElements.length) {
-        deletions.push(...deletedElements);
+    if (pointer) {
+      if (inBetween.length > 1) {
+        deletions.push(...inBetween.slice(1, inBetween.length));
       }
-      lastFound = ++j;
-      updates.push(targetElement);
+      rootElement.next = pointer;
+      rootElement = pointer;
     } else {
-      creations.push(newList[i]);
-      j = lastFound;
+      let newElement = { content: 'NEW', key: list[i], next: rootElement.next };
+      rootElement.next = newElement;
+      rootElement = newElement;
     }
-    elements.push({ key: newList[i] });
-
     i++;
   }
 
-  let deletedElements = nodeElements.slice(lastFound);
-  if (deletedElements.length) {
-    deletions.push(...deletedElements);
+  let pointer = rootElement;
+  let inBetween = [];
+  while (pointer && pointer.key !== list[i]) {
+    inBetween.push(pointer);
+    pointer = pointer.next;
   }
+  if (inBetween.length > 1) {
+    deletions.push(...inBetween.slice(1, inBetween.length));
+  }
+  rootElement.next = null;
 
-  return { elements, updates, deletions, creations };
+  return deletions;
 }
 
 function duplicateNode(content, parentNode) {
