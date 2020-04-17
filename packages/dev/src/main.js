@@ -1,4 +1,3 @@
-import appleTemplate from './apple.html';
 import { default as mainTemplate } from './main.html';
 let body = document.querySelectorAll('body')[0];
 
@@ -117,7 +116,7 @@ function html2json(html, componentsList) {
   return createNodefromDOMNode(createDOMNodeFromHTML(html), componentsList);
 }
 
-//-----------------------------update logic--------------------------------
+//BEGIN----------------------update and render logic-------------------------
 let processQueue = new Set();
 let renderQueue = new Set();
 
@@ -196,6 +195,48 @@ function updateNodeAttributes(node, object) {
   return object;
 }
 
+function renderNode(node) {
+  if (node.toBeDeleted) {
+    node.DOMNode.remove();
+    node.toBeDeleted = false;
+  } else if (node.insertAfterNode) {
+    node.insertAfterNode.after(node.DOMNode);
+    node.insertAfterNode = null;
+  } else {
+    if (!node.skipChildren && node.children) {
+      node.children.forEach((child) => {
+        node.newDOMNode.appendChild(child.DOMNode);
+      });
+    }
+    node.DOMNode.replaceWith(node.newDOMNode);
+    node.DOMNode = node.newDOMNode;
+  }
+}
+
+function workLoop(deadline) {
+  let thereIsStillTime = true;
+  while (processQueue.size && thereIsStillTime) {
+    let elementToProcess = processQueue.entries().next().value[0];
+    processQueue.delete(elementToProcess);
+    updateNode(elementToProcess);
+
+    thereIsStillTime = deadline.timeRemaining() > 0;
+  }
+  while (renderQueue.size && thereIsStillTime) {
+    let elementToRender = renderQueue.entries().next().value[0];
+    renderQueue.delete(elementToRender);
+    renderNode(elementToRender);
+
+    thereIsStillTime = deadline.timeRemaining() > 0;
+  }
+
+  requestIdleCallback(workLoop);
+}
+
+requestIdleCallback(workLoop);
+//END------------------------update and render logic-------------------------
+
+//BEGIN-------------------------for node update------------------------------
 function printLinkedList(pointer) {
   let out = [];
   while (pointer) {
@@ -220,13 +261,7 @@ function updateForNode(node, object) {
     list
   );
 
-  // console.log('##################################################');
-  // console.log(updates.map(a=>a.key));
-  // console.log(deletions.map(a=>a.key));
-  // console.log(additions.map(a=>a.key));
-  // console.log('--------------------------------------------------');
-
-  printLinkedList(node.elements);
+  // printLinkedList(node.elements);
 
   //add the stuff
   for (let i = additions.length - 1; i >= 0; i--) {
@@ -257,6 +292,24 @@ function updateForNode(node, object) {
       object: { ...node.content, [iterator]: updates[i].key },
     });
   }
+}
+
+function duplicateNode(content, parentNode) {
+  let newContent = {
+    ...content,
+    children: [],
+    DOMNode: content.DOMNode.cloneNode(false),
+    newDOMNode: content.DOMNode.cloneNode(false),
+  };
+  if (parentNode) {
+    parentNode.appendChild(newContent.DOMNode);
+  }
+  if (content.children) {
+    newContent.children = content.children.map((child) =>
+      duplicateNode(child, newContent.DOMNode)
+    );
+  }
+  return newContent;
 }
 
 function updateForLoopElements(elementPointer, list) {
@@ -315,25 +368,9 @@ function updateForLoopElements(elementPointer, list) {
 
   return { updates, deletions, additions };
 }
+//END-------------------------for node update------------------------------
 
-function duplicateNode(content, parentNode) {
-  let newContent = {
-    ...content,
-    children: [],
-    DOMNode: content.DOMNode.cloneNode(false),
-    newDOMNode: content.DOMNode.cloneNode(false),
-  };
-  if (parentNode) {
-    parentNode.appendChild(newContent.DOMNode);
-  }
-  if (content.children) {
-    newContent.children = content.children.map((child) =>
-      duplicateNode(child, newContent.DOMNode)
-    );
-  }
-  return newContent;
-}
-
+//BEGIN-------------------------if node update-----------------------------
 function updateIfNode(node, object) {
   let field = node.expression;
   let directLogic = true;
@@ -370,7 +407,9 @@ function updateIfNode(node, object) {
     updateNode({ node: node.content, object });
   }
 }
+//END-------------------------if node update-------------------------------
 
+//BEGIN-------------------------text node update---------------------------
 function updateTextNode(node, object) {
   let text = insertFieldsIntoString(node.text, object);
   if (node.DOMNode.nodeValue !== text) {
@@ -400,48 +439,9 @@ function insertFieldsIntoString(string = '', object = {}) {
 
   return string;
 }
+//END-------------------------text node update-----------------------------
 
-function renderNode(node) {
-  if (node.toBeDeleted) {
-    node.DOMNode.remove();
-    node.toBeDeleted = false;
-  } else if (node.insertAfterNode) {
-    node.insertAfterNode.after(node.DOMNode);
-    node.insertAfterNode = null;
-  } else {
-    if (!node.skipChildren && node.children) {
-      node.children.forEach((child) => {
-        node.newDOMNode.appendChild(child.DOMNode);
-      });
-    }
-    node.DOMNode.replaceWith(node.newDOMNode);
-    node.DOMNode = node.newDOMNode;
-  }
-}
-
-function workLoop(deadline) {
-  let thereIsStillTime = true;
-  while (processQueue.size && thereIsStillTime) {
-    let elementToProcess = processQueue.entries().next().value[0];
-    processQueue.delete(elementToProcess);
-    updateNode(elementToProcess);
-
-    thereIsStillTime = deadline.timeRemaining() > 0;
-  }
-  while (renderQueue.size && thereIsStillTime) {
-    let elementToRender = renderQueue.entries().next().value[0];
-    renderQueue.delete(elementToRender);
-    renderNode(elementToRender);
-
-    thereIsStillTime = deadline.timeRemaining() > 0;
-  }
-
-  requestIdleCallback(workLoop);
-}
-
-requestIdleCallback(workLoop);
-
-//----------------------------component logic------------------------------
+//BEGIN-------------------------component logic----------------------------
 let componentsList = {};
 
 function toUpperKebabCase(camelCase = '') {
@@ -481,7 +481,9 @@ function bindClassMethodsToProxy(object, proxy) {
     }
   });
 }
+//END-------------------------component logic------------------------------
 
+//BEGIN------------------------------app-----------------------------------
 class Component {
   inputs = {};
   constructor(template) {
@@ -492,20 +494,9 @@ class Component {
   }
 }
 
-class Apple extends Component {
-  constructor() {
-    super(appleTemplate);
-  }
-
-  decrease() {
-    this.inputs['content-change'](2);
-  }
-}
-
 class Main extends Component {
   count = 0;
   as = [];
-  something = 0;
   test = [
     [1],
     [1, 2],
@@ -526,33 +517,18 @@ class Main extends Component {
     this.as = this.test[this.count];
   }
 
-  length() {
-    return this.as.length;
-  }
-
-  isOdd() {
-    return this.count % 2;
-  }
-
   addA() {
-    this.count = (this.count + 1) % 12;
-    this.as = this.test[this.count];
-  }
-
-  removeA() {
-    this.as.splice(Math.floor(Math.random() * this.as.length), 1);
-    this.as = [...this.as];
-  }
-
-  changeSomething() {
-    this.something = Math.floor(Math.random() * 90 + 10);
+    this.as = [...this.as, Math.floor(Math.random() * 100)];
+    // this.count++;
   }
 }
 
-loadComponents(Main, Apple);
+loadComponents(Main);
 let main = new Main();
 body.appendChild(main.template.DOMNode);
 console.log(main);
+
+//END------------------------------app-------------------------------------
 
 //----------------------------------keep-----------------------------------
 function getListDiffs(old, current) {
@@ -583,5 +559,4 @@ function getListDiffs(old, current) {
   }
   return { deleted, created };
 }
-
 //--------------------------free stuff-----------------------

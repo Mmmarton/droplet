@@ -1,18 +1,6 @@
-<div style="width: 300px; height: 90vh">
-    <h1 class='title'>Pumpkin</h1>
-    <p>Elements: {length}, Something: {something}</p>
-    <button onclick="{addA}">Add A</button>
-    <button onclick="{changeSomething}">Change something</button>
-    <button onclick="{removeA}">Remove A</button>
-    <hr>
-    <div class='container' *for="a of as">
-        <div>aha {a} {index}</div>
-    </div>
-    <hr>
-    <span *if="isOdd">
-        <div>Odd</div>
-    </span>
-    <span *if="!isOdd">
-        <div>Even</div>
-    </span>
+<div style="width: 300px; height: 90vh;">
+  <button onclick="{addA}">Add A</button>
+  <div class="container" *for="a of as">
+    {a}
+  </div>
 </div>
