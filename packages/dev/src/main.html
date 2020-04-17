@@ -1,6 +1,14 @@
 <div style="width: 300px; height: 90vh;">
-  <span style="border: 1px solid #982;"> {a} </span>
-  <span style="border: 1px solid #834;"> {b} </span>
-  <span *if='!a'>YES</span>
-  <span *for='cc of c'>HOP</span>
+  <button onclick="{changeList}" style="display: block;">Change</button>
+  <span
+    *for="element of list"
+    style="
+      border: 1px solid #982;
+      padding: 5px;
+      margin: 2px;
+      display: inline-block;
+      border-radius: 10px;
+    "
+    >HOP {element}</span
+  >
 </div>

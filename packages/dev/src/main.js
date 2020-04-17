@@ -160,7 +160,6 @@ function getObjectAttribute(object, attribute) {
 }
 
 function updateNode({ node, object }) {
-  console.log('update node: ', node.elementName || node.text);
   if (node.elementName === '*if') {
     updateIfNode(node, object);
   }
@@ -225,7 +224,6 @@ function updateNodeAttributes(node, object) {
 }
 
 function renderNode(node) {
-  console.log('render: ', node.elementName || node.text);
   if (node.toBeDeleted) {
     node.DOMNode.remove();
     node.toBeDeleted = false;
@@ -266,17 +264,6 @@ requestIdleCallback(workLoop);
 //END------------------------update and render logic-------------------------
 
 //BEGIN-------------------------for node update------------------------------
-function printLinkedList(pointer) {
-  let out = [];
-  while (pointer) {
-    if (pointer.key) {
-      out.push(pointer.key);
-    }
-    pointer = pointer.next;
-  }
-  console.log(out);
-}
-
 function updateForNode(node, object) {
   let [iterator, listName] = node.expression.split(' of ');
 
@@ -294,6 +281,7 @@ function updateForNode(node, object) {
     return;
   }
 
+  console.log(list);
   let { updates, deletions, additions } = updateForLoopElements(
     node.elements,
     list
@@ -304,8 +292,6 @@ function updateForNode(node, object) {
     deletions: deletions.map((a) => a.key).join(),
     additions: additions.map((a) => a.key).join(),
   });
-
-  // printLinkedList(node.elements);
 
   //add the stuff
   for (let i = additions.length - 1; i >= 0; i--) {
@@ -321,9 +307,9 @@ function updateForNode(node, object) {
         // merge with for variables
         ...duplicateNode(node.content),
       };
-      renderQueue.add(additions[i].content);
       updates.push(additions[i]);
     }
+    renderQueue.add(additions[i].content);
   }
 
   for (let i = 0; i < deletions.length; i++) {
@@ -384,13 +370,14 @@ function updateForLoopElements(elementPointer, list) {
         next: elementPointer.next,
         content: { insertAfterNode: lastExistingElement.content },
       };
+
       let alreadyExistingElementIndex = deletions.findIndex(
         (element) => element.key === list[i]
       );
       if (alreadyExistingElementIndex > -1) {
         newElement.content = {
-          ...newElement.content,
           ...deletions.splice(alreadyExistingElementIndex, 1)[0].content,
+          ...newElement.content,
         };
       }
       elementPointer.next = newElement;
@@ -508,7 +495,6 @@ function loadComponents(...components) {
 function createProxy(object) {
   return new Proxy(object, {
     set(target, name, value) {
-      console.log('set: ' + name);
       target[name] = value;
       processQueue.add({
         node: object.template,
@@ -541,15 +527,17 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  a = 1;
-  b = false;
-  d = 'HAHA';
+  list = [1];
   constructor() {
     super(mainTemplate);
+  }
 
-    setTimeout(() => (this.a = 2), 1000);
-    setTimeout(() => (this.c = [1, 2]), 1000);
-    setTimeout(() => (this.a = 0), 2000);
+  changeList() {
+    this.list = [];
+    const max = Math.random() * 10;
+    for (let i = 0; i < max; i++) {
+      this.list.push(Math.floor(Math.random() * 10));
+    }
   }
 }
 
