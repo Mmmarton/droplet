@@ -51,8 +51,6 @@ function buildIfNode(DOMNode, componentsList) {
     placeholder: document.createTextNode(''),
     content: createNodefromDOMNode(DOMNode, componentsList),
   };
-
-  DOMNode.replaceWith(node.placeholder);
   return node;
 }
 
@@ -132,6 +130,7 @@ function getObjectAttribute(object, attribute) {
 }
 
 function updateNode({ node, object }) {
+  console.log('update node: ', node.elementName || node.text);
   if (node.elementName === '*if') {
     updateIfNode(node, object);
   }
@@ -196,6 +195,7 @@ function updateNodeAttributes(node, object) {
 }
 
 function renderNode(node) {
+  console.log('render: ', node.elementName || node.text);
   if (node.toBeDeleted) {
     node.DOMNode.remove();
     node.toBeDeleted = false;
@@ -463,6 +463,7 @@ function loadComponents(...components) {
 function createProxy(object) {
   return new Proxy(object, {
     set(target, name, value) {
+      console.log('set: ' + name);
       target[name] = value;
       processQueue.add({
         node: object.template,
@@ -481,9 +482,7 @@ function bindClassMethodsToProxy(object, proxy) {
     }
   });
 }
-//END-------------------------component logic------------------------------
 
-//BEGIN------------------------------app-----------------------------------
 class Component {
   inputs = {};
   constructor(template) {
@@ -493,33 +492,14 @@ class Component {
     return this.proxy;
   }
 }
+//END-------------------------component logic------------------------------
 
+//BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  count = 0;
-  as = [];
-  test = [
-    [1],
-    [1, 2],
-    [1, 2, 3],
-    [1, 3, 2],
-    [1, 3, 3],
-    [1, 1, 1],
-    [2, 2, 2],
-    [3, 3, 3],
-    [3, 1, 3],
-    [3, 1, 2],
-    [3, 1],
-    [3],
-  ];
-
+  a = 'secret';
+  show = true;
   constructor() {
     super(mainTemplate);
-    this.as = this.test[this.count];
-  }
-
-  addA() {
-    this.as = [...this.as, Math.floor(Math.random() * 100)];
-    // this.count++;
   }
 }
 
