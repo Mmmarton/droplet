@@ -153,7 +153,11 @@ function getObjectAttribute(object, attribute) {
   let properties = attribute.split('.');
 
   for (let property of properties) {
-    value = value[property];
+    if (property[property.length - 1] === ')') {
+      value = value[property.substring(0, property.length - 2)]();
+    } else {
+      value = value[property];
+    }
   }
 
   return value;
@@ -192,11 +196,7 @@ function updateNodeAttributes(node, object) {
     let value = node.attributes[attribute];
     if (value[0] === '{') {
       value = value.substring(1, value.length - 1);
-      if (value[value.length - 1] === ')') {
-        value = object[value.substring(0, value.length - 2)]();
-      } else {
-        value = getObjectAttribute(object, value);
-      }
+      value = getObjectAttribute(object, value);
 
       if (attribute.startsWith('on')) {
         if (!node.DOMNode[attribute]) {
@@ -320,7 +320,7 @@ function updateForNode(node, object) {
   for (let i = 0; i < updates.length; i++) {
     updateNode({
       node: updates[i].content,
-      object: { ...node.content, [iterator]: updates[i].key },
+      object: { ...object, ...node.content, [iterator]: updates[i].key },
     });
   }
 }
@@ -457,14 +457,16 @@ function insertFieldsIntoString(string = '', object = {}) {
 
   for (let section of sections) {
     let field = section.split('{')[1];
+
     if (field) {
       fields[field] = getObjectAttribute(object, field);
     }
   }
 
   Object.keys(fields).forEach((key) => {
+    console.log(key);
     string = string.replace(
-      new RegExp(`{${key}}`, 'g'),
+      new RegExp(`{${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}}`, 'g'),
       getObjectAttribute(object, key)
     );
   });
@@ -513,7 +515,6 @@ function bindClassMethodsToProxy(object, proxy) {
     }
   });
 }
-
 class Component {
   inputs = {};
   constructor(template) {
@@ -528,6 +529,12 @@ class Component {
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
   list = [1];
+  secret = {
+    color: 'red',
+    name: () => {
+      return { color: 'color: red' };
+    },
+  };
   constructor() {
     super(mainTemplate);
   }
