@@ -7,6 +7,8 @@
     "bump-version": "lerna version --conventional-commits --yes"
   },
   "devDependencies": {
+    "commitizen": "^4.0.4",
+    "cz-customizable": "^6.2.0",
     "lerna": "^3.20.2"
   },
   "repository": {
@@ -18,5 +20,6 @@
   "bugs": {
     "url": "https://github.com/NuttyYokel/droplet/issues"
   },
-  "homepage": "https://github.com/NuttyYokel/droplet#readme"
+  "homepage": "https://github.com/NuttyYokel/droplet#readme",
+  "dependencies": {}
 }
