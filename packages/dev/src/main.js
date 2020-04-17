@@ -115,10 +115,40 @@ function html2json(html, componentsList) {
 }
 
 //BEGIN----------------------update and render logic-------------------------
-let processQueue = new Set();
+
+class NodeSet {
+  list = [];
+
+  get size() {
+    return this.list.length;
+  }
+
+  add(value) {
+    for (let i = 0; i < this.list.length; i++) {
+      if (
+        this.list[i].node === value.node &&
+        this.list[i].object === value.object
+      ) {
+        this.list[i] = value;
+        return;
+      }
+    }
+    this.list.push(value);
+  }
+
+  pop() {
+    return this.list.pop();
+  }
+}
+
+let processQueue = new NodeSet();
 let renderQueue = new Set();
 
 function getObjectAttribute(object, attribute) {
+  if (!attribute) {
+    return null;
+  }
+
   let value = object;
   let properties = attribute.split('.');
 
@@ -216,8 +246,7 @@ function renderNode(node) {
 function workLoop(deadline) {
   let thereIsStillTime = true;
   while (processQueue.size && thereIsStillTime) {
-    let elementToProcess = processQueue.entries().next().value[0];
-    processQueue.delete(elementToProcess);
+    let elementToProcess = processQueue.pop();
     updateNode(elementToProcess);
 
     thereIsStillTime = deadline.timeRemaining() > 0;
@@ -512,13 +541,15 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  as = ['a', 'b'];
+  a = 1;
+  b = false;
+  d = 'HAHA';
   constructor() {
     super(mainTemplate);
-    setTimeout(
-      () => (this.as = [...this.as, this.as[this.as.length - 1] + 1 || 0]),
-      1000
-    );
+
+    setTimeout(() => (this.a = 2), 1000);
+    setTimeout(() => (this.c = [1, 2]), 1000);
+    setTimeout(() => (this.a = 0), 2000);
   }
 }
 
