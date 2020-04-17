@@ -249,17 +249,32 @@ function printLinkedList(pointer) {
 }
 
 function updateForNode(node, object) {
-  let [iterator, list] = node.expression.split(' of ');
+  let [iterator, listName] = node.expression.split(' of ');
 
-  let objectAttribute = getObjectAttribute(object, list);
-  list =
+  let objectAttribute = getObjectAttribute(object, listName);
+  const list =
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
   node.list = list;
+
+  if (!list) {
+    return;
+  } else if (!(list instanceof Array)) {
+    console.warn(
+      `${object.constructor.name}.${listName} is not an array. Please supply an array.`
+    );
+    return;
+  }
 
   let { updates, deletions, additions } = updateForLoopElements(
     node.elements,
     list
   );
+
+  console.log({
+    updates: updates.map((a) => a.key).join(),
+    deletions: deletions.map((a) => a.key).join(),
+    additions: additions.map((a) => a.key).join(),
+  });
 
   // printLinkedList(node.elements);
 
@@ -278,6 +293,7 @@ function updateForNode(node, object) {
         ...duplicateNode(node.content),
       };
       renderQueue.add(additions[i].content);
+      updates.push(additions[i]);
     }
   }
 
@@ -496,10 +512,13 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  a = 'secret';
-  show = true;
+  as = ['a', 'b'];
   constructor() {
     super(mainTemplate);
+    setTimeout(
+      () => (this.as = [...this.as, this.as[this.as.length - 1] + 1 || 0]),
+      1000
+    );
   }
 }
 
