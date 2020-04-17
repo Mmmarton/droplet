@@ -28,7 +28,7 @@ function buildNormalNode(DOMNode, componentsList) {
     attributes: {},
     children: [],
     DOMNode,
-    component: componentsList[DOMNode.nodeName]
+    component: componentsList[DOMNode.nodeName],
   };
 
   initializeNodeAttributes(node);
@@ -50,7 +50,7 @@ function buildIfNode(DOMNode, componentsList) {
     expression,
     active: null,
     placeholder: document.createTextNode(''),
-    content: createNodefromDOMNode(DOMNode, componentsList)
+    content: createNodefromDOMNode(DOMNode, componentsList),
   };
 
   DOMNode.replaceWith(node.placeholder);
@@ -65,7 +65,7 @@ function buildForNode(DOMNode, componentsList) {
     expression,
     elements: {},
     placeholder: document.createTextNode(''),
-    content: createNodefromDOMNode(DOMNode, componentsList)
+    content: createNodefromDOMNode(DOMNode, componentsList),
   };
 
   DOMNode.replaceWith(node.placeholder);
@@ -73,7 +73,7 @@ function buildForNode(DOMNode, componentsList) {
 }
 
 function initializeNodeAttributes(node) {
-  Object.keys(node.DOMNode.attributes).forEach(key => {
+  Object.keys(node.DOMNode.attributes).forEach((key) => {
     let attribute = node.DOMNode.attributes[key];
     node.attributes[attribute.name] = attribute.value;
     if (attribute.name.startsWith('on')) {
@@ -92,7 +92,7 @@ function initializeNodeComponent(node) {
 }
 
 function initializeChildNodes(node, componentsList) {
-  Object.keys(node.DOMNode.childNodes).forEach(key => {
+  Object.keys(node.DOMNode.childNodes).forEach((key) => {
     let child = buildChildNode(node.DOMNode.childNodes[key], componentsList);
     if (child) {
       node.children.push(child);
@@ -151,17 +151,17 @@ function updateNode({ node, object }) {
   }
 
   if (node.children) {
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       processQueue.add({
         node: child,
-        object
+        object,
       });
     });
   }
 }
 
 function updateNodeAttributes(node, object) {
-  Object.keys(node.attributes).forEach(attribute => {
+  Object.keys(node.attributes).forEach((attribute) => {
     let value = node.attributes[attribute];
     if (value[0] === '{') {
       value = value.substring(1, value.length - 1);
@@ -220,6 +220,12 @@ function updateForNode(node, object) {
     list
   );
 
+  // console.log('##################################################');
+  // console.log(updates.map(a=>a.key));
+  // console.log(deletions.map(a=>a.key));
+  // console.log(additions.map(a=>a.key));
+  // console.log('--------------------------------------------------');
+
   printLinkedList(node.elements);
 
   //add the stuff
@@ -234,7 +240,7 @@ function updateForNode(node, object) {
       additions[i].content = {
         ...additions[i].content,
         // merge with for variables
-        ...duplicateNode(node.content)
+        ...duplicateNode(node.content),
       };
       renderQueue.add(additions[i].content);
     }
@@ -246,10 +252,9 @@ function updateForNode(node, object) {
   }
 
   for (let i = 0; i < updates.length; i++) {
-    console.log({ ...node.content, [iterator]: updates[i].key });
     updateNode({
       node: updates[i].content,
-      object: { ...node.content, [iterator]: updates[i].key }
+      object: { ...node.content, [iterator]: updates[i].key },
     });
   }
 }
@@ -279,15 +284,15 @@ function updateForLoopElements(elementPointer, list) {
       let newElement = {
         key: list[i],
         next: elementPointer.next,
-        content: { insertAfterNode: lastExistingElement.content }
+        content: { insertAfterNode: lastExistingElement.content },
       };
       let alreadyExistingElementIndex = deletions.findIndex(
-        element => element.key === list[i]
+        (element) => element.key === list[i]
       );
       if (alreadyExistingElementIndex > -1) {
         newElement.content = {
           ...newElement.content,
-          ...deletions.splice(alreadyExistingElementIndex, 1)[0].content
+          ...deletions.splice(alreadyExistingElementIndex, 1)[0].content,
         };
       }
       elementPointer.next = newElement;
@@ -316,13 +321,13 @@ function duplicateNode(content, parentNode) {
     ...content,
     children: [],
     DOMNode: content.DOMNode.cloneNode(false),
-    newDOMNode: content.DOMNode.cloneNode(false)
+    newDOMNode: content.DOMNode.cloneNode(false),
   };
   if (parentNode) {
     parentNode.appendChild(newContent.DOMNode);
   }
   if (content.children) {
-    newContent.children = content.children.map(child =>
+    newContent.children = content.children.map((child) =>
       duplicateNode(child, newContent.DOMNode)
     );
   }
@@ -386,7 +391,7 @@ function insertFieldsIntoString(string = '', object = {}) {
     }
   }
 
-  Object.keys(fields).forEach(key => {
+  Object.keys(fields).forEach((key) => {
     string = string.replace(
       new RegExp(`{${key}}`, 'g'),
       getObjectAttribute(object, key)
@@ -405,7 +410,7 @@ function renderNode(node) {
     node.insertAfterNode = null;
   } else {
     if (!node.skipChildren && node.children) {
-      node.children.forEach(child => {
+      node.children.forEach((child) => {
         node.newDOMNode.appendChild(child.DOMNode);
       });
     }
@@ -450,7 +455,7 @@ function toUpperKebabCase(camelCase = '') {
 }
 
 function loadComponents(...components) {
-  components.forEach(component => {
+  components.forEach((component) => {
     componentsList[toUpperKebabCase(component.name)] = component;
   });
 }
@@ -461,16 +466,16 @@ function createProxy(object) {
       target[name] = value;
       processQueue.add({
         node: object.template,
-        object
+        object,
       });
       return true;
-    }
+    },
   });
 }
 
 function bindClassMethodsToProxy(object, proxy) {
   let methods = Object.getOwnPropertyNames(Object.getPrototypeOf(object));
-  methods.forEach(method => {
+  methods.forEach((method) => {
     if (typeof object[method] === 'function' && method !== 'constructor') {
       object[method] = object[method].bind(proxy);
     }
@@ -502,18 +507,23 @@ class Main extends Component {
   as = [];
   something = 0;
   test = [
-    [1, 2, 3, 4, 5],
-    [1, 7, 3, 4, 5],
-    [1, 7, 9, 3, 4, 5],
-    [1, 7, 8, 9, 3, 4, 5],
-    [1, 2, 3, 4, 5, 7, 8, 9],
-    [1, 2, 5, 6, 7, 7, 8, 9],
-    [1, 2, 7, 3, 4, 5, 8, 9],
-    [1, 2, 3, 4, 5, 8, 9]
+    [1],
+    [1, 2],
+    [1, 2, 3],
+    [1, 3, 2],
+    [1, 3, 3],
+    [1, 1, 1],
+    [2, 2, 2],
+    [3, 3, 3],
+    [3, 1, 3],
+    [3, 1, 2],
+    [3, 1],
+    [3],
   ];
 
   constructor() {
     super(mainTemplate);
+    this.as = this.test[this.count];
   }
 
   length() {
@@ -525,8 +535,8 @@ class Main extends Component {
   }
 
   addA() {
+    this.count = (this.count + 1) % 12;
     this.as = this.test[this.count];
-    this.count = (this.count + 1) % 8;
   }
 
   removeA() {
