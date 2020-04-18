@@ -1,3 +1,4 @@
+import { default as appleTemplate } from './apple.html';
 import { default as mainTemplate } from './main.html';
 let body = document.querySelectorAll('body')[0];
 
@@ -154,9 +155,14 @@ function getObjectAttribute(object, attribute) {
 
   for (let property of properties) {
     if (property[property.length - 1] === ')') {
-      value = value[property.substring(0, property.length - 2)]();
+      value = value[property.substring(0, property.length - 2)];
+      if (value) {
+        value = value();
+      }
     } else {
-      value = value[property];
+      if (value) {
+        value = value[property];
+      }
     }
   }
 
@@ -246,7 +252,6 @@ function workLoop(deadline) {
   while (processQueue.size && thereIsStillTime) {
     let elementToProcess = processQueue.pop();
     updateNode(elementToProcess);
-
     thereIsStillTime = deadline.timeRemaining() > 0;
   }
   while (renderQueue.size && thereIsStillTime) {
@@ -281,17 +286,10 @@ function updateForNode(node, object) {
     return;
   }
 
-  console.log(list);
   let { updates, deletions, additions } = updateForLoopElements(
     node.elements,
     list
   );
-
-  console.log({
-    updates: updates.map((a) => a.key).join(),
-    deletions: deletions.map((a) => a.key).join(),
-    additions: additions.map((a) => a.key).join(),
-  });
 
   //add the stuff
   for (let i = additions.length - 1; i >= 0; i--) {
@@ -464,7 +462,6 @@ function insertFieldsIntoString(string = '', object = {}) {
   }
 
   Object.keys(fields).forEach((key) => {
-    console.log(key);
     string = string.replace(
       new RegExp(`{${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}}`, 'g'),
       getObjectAttribute(object, key)
@@ -529,12 +526,9 @@ class Component {
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
   list = [1];
-  secret = {
-    color: 'red',
-    name: () => {
-      return { color: 'color: red' };
-    },
-  };
+  secret = 'shhh';
+  show = true;
+
   constructor() {
     super(mainTemplate);
   }
@@ -546,42 +540,27 @@ class Main extends Component {
       this.list.push(Math.floor(Math.random() * 10));
     }
   }
+
+  decrease() {
+    console.log('NOOO');
+  }
 }
 
-loadComponents(Main);
+class Apple extends Component {
+  count = 10;
+
+  constructor() {
+    super(appleTemplate);
+  }
+
+  decrease() {
+    console.log('DECREASE');
+  }
+}
+
+loadComponents(Main, Apple);
 let main = new Main();
 body.appendChild(main.template.DOMNode);
 console.log(main);
 
 //END------------------------------app-------------------------------------
-
-//----------------------------------keep-----------------------------------
-function getListDiffs(old, current) {
-  let deleted = {};
-  let created = {};
-  if (old[0] instanceof Object) {
-    for (let i = 0; i < old.length; i++) {
-      deleted[JSON.stringify(old[i])] = old[i];
-    }
-    for (let i = 0; i < current.length; i++) {
-      if (deleted[JSON.stringify(current[i])]) {
-        delete deleted[JSON.stringify(current[i])];
-      } else {
-        created[JSON.stringify(current[i])] = current[i];
-      }
-    }
-  } else {
-    for (let i = 0; i < old.length; i++) {
-      deleted[old[i]] = old[i];
-    }
-    for (let i = 0; i < current.length; i++) {
-      if (deleted[current[i]]) {
-        delete deleted[current[i]];
-      } else {
-        created[current[i]] = current[i];
-      }
-    }
-  }
-  return { deleted, created };
-}
-//--------------------------free stuff-----------------------
