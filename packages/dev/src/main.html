@@ -1,14 +1,6 @@
 <div style="width: 300px; height: 90vh;">
-  <button onclick="{changeList}" style="display: block;">Change</button>
-  <span
-    *for="element of list"
-    style="
-      border: 1px solid #982;
-      padding: 5px;
-      margin: 2px;
-      display: inline-block;
-      border-radius: 10px;
-    "
-    ><apple content="{element}"></apple
-  ></span>
+  <button onclick="{changeList}">Change</button>
+  <div *for="element of list">
+    <button onclick="{decrease}" style="{style}">decrease {element}</button>
+  </div>
 </div>

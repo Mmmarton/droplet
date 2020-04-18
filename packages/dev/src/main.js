@@ -2,6 +2,33 @@ import { default as appleTemplate } from './apple.html';
 import { default as mainTemplate } from './main.html';
 let body = document.querySelectorAll('body')[0];
 
+class NodeSet {
+  list = [];
+
+  get size() {
+    return this.list.length;
+  }
+
+  add(value) {
+    for (let i = 0; i < this.list.length; i++) {
+      if (
+        this.list[i].node === value.node &&
+        this.list[i].object === value.object
+      ) {
+        this.list[i] = value;
+        return;
+      }
+    }
+    this.list.push(value);
+  }
+
+  pop() {
+    return this.list.pop();
+  }
+}
+
+let processQueue = new NodeSet();
+let renderQueue = new Set();
 //-----------------------------html parsing--------------------------------
 function createDOMNodeFromHTML(htmlString) {
   let div = document.createElement('div');
@@ -116,35 +143,6 @@ function html2json(html, componentsList) {
 }
 
 //BEGIN----------------------update and render logic-------------------------
-
-class NodeSet {
-  list = [];
-
-  get size() {
-    return this.list.length;
-  }
-
-  add(value) {
-    for (let i = 0; i < this.list.length; i++) {
-      if (
-        this.list[i].node === value.node &&
-        this.list[i].object === value.object
-      ) {
-        this.list[i] = value;
-        return;
-      }
-    }
-    this.list.push(value);
-  }
-
-  pop() {
-    return this.list.pop();
-  }
-}
-
-let processQueue = new NodeSet();
-let renderQueue = new Set();
-
 function getObjectAttribute(object, attribute) {
   if (!attribute) {
     return null;
@@ -525,9 +523,10 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  list = [1];
+  list = [1, 2];
   secret = 'shhh';
   show = true;
+  style = 'color: teal';
 
   constructor() {
     super(mainTemplate);
