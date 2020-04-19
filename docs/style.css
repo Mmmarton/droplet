@@ -84,8 +84,19 @@ body {
   color: #f0960e;
 }
 
+.repo a {
+  display: inline-block;
+  font-family: 'Calibri';
+  color: #f0960e;
+  text-decoration: none;
+}
+
+.repo a:hover {
+  font-family: 'Calibri';
+  text-decoration: underline;
+}
+
 .button-container {
-  /* background-color: red; */
   text-align: center;
 }
 
