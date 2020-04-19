@@ -14,7 +14,7 @@
 
 .logo {
   margin-top: 30vh;
-  width: 40%;
+  width: 20%;
 }
 
 .title {
@@ -22,7 +22,7 @@
   font-weight: 600;
   color: #322218;
   margin: 0;
-  font-size: 7vw;
+  font-size: 4vw;
 }
 
 .details-section {
@@ -90,4 +90,10 @@
 
 .get-it {
   margin: 3rem 0 0 0;
+}
+
+.motto {
+  font-family: 'Raleway';
+  color: #6a4d3b;
+  font-size: 2rem;
 }
