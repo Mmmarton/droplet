@@ -1,38 +1,3 @@
-@font-face {
-  font-family: 'Sen';
-  src: url('fonts/Sen-Regular.ttf');
-  font-weight: normal;
-}
-
-@font-face {
-  font-family: 'Sen';
-  src: url('fonts/Sen-Bold.ttf');
-  font-weight: 600;
-}
-
-@font-face {
-  font-family: 'Sen';
-  src: url('fonts/Sen-ExtraBold.ttf');
-  font-weight: 800;
-}
-
-@font-face {
-  font-family: 'Raleway';
-  src: url('fonts/Raleway-Regular.ttf');
-  font-weight: normal;
-}
-
-@font-face {
-  font-family: 'Raleway';
-  src: url('fonts/Raleway-Bold.ttf');
-  font-weight: 600;
-}
-
-body {
-  background-color: #fff9f2;
-  margin: 0;
-}
-
 .main-container {
   min-width: 100vw;
   min-height: 100vh;
@@ -50,7 +15,6 @@ body {
 .logo {
   margin-top: 30vh;
   width: 40%;
-  height: auto;
 }
 
 .title {
@@ -90,7 +54,6 @@ body {
   display: inline-block;
   font-family: 'Calibri';
   color: #f0960e;
-  text-decoration: none;
 }
 
 .repo a:hover {
@@ -100,6 +63,8 @@ body {
 
 .button-container {
   text-align: center;
+  /* background-color: red; */
+  height: 9rem;
 }
 
 .documentation {
@@ -115,21 +80,6 @@ body {
   padding: 1rem 2rem;
   border-radius: 10px;
   transition: all 0.1s;
-}
-
-@keyframes shake {
-  0% {
-    transform: rotate(0);
-  }
-  33% {
-    transform: rotate(-1deg);
-  }
-  66% {
-    transform: rotate(1deg);
-  }
-  100% {
-    transform: rotate(-1deg);
-  }
 }
 
 .documentation:hover {

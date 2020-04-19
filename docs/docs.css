@@ -1,0 +1,57 @@
+html {
+  scroll-behavior: smooth;
+}
+
+.menu {
+  position: absolute;
+  top: 0;
+  display: inline-block;
+  background-color: #322218;
+  width: 10rem;
+  border-bottom-right-radius: 10px;
+}
+
+.logo {
+  height: 3rem;
+}
+
+.title {
+  margin: 0;
+  font-family: 'Sen';
+  font-weight: 600;
+  color: #dcc6a5;
+}
+
+.logo-section {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.navigation {
+  font-family: 'Sen';
+  font-weight: normal;
+  width: min-content;
+  margin: 0 auto;
+}
+
+.navigation a {
+  display: block;
+  color: #dcc6a5;
+  margin: 1rem 0;
+  transition: all 0.1s;
+  width: 8rem;
+  height: 2rem;
+}
+
+.navigation a:hover {
+  font-size: 1.3rem;
+  animation: shake 0.2s;
+}
+
+.content {
+  margin: 8rem auto;
+  width: 70%;
+  padding-left: 10rem;
+}
