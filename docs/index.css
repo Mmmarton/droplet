@@ -46,18 +46,16 @@
 }
 
 .repo {
-  font-family: 'Calibri';
+  font-family: sans-serif;
   color: #f0960e;
 }
 
 .repo a {
   display: inline-block;
-  font-family: 'Calibri';
   color: #f0960e;
 }
 
 .repo a:hover {
-  font-family: 'Calibri';
   text-decoration: underline;
 }
 
