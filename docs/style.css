@@ -1,0 +1,128 @@
+@font-face {
+  font-family: 'Sen';
+  src: url('fonts/Sen-Regular.ttf');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Sen';
+  src: url('fonts/Sen-Bold.ttf');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Sen';
+  src: url('fonts/Sen-ExtraBold.ttf');
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('fonts/Raleway-Regular.ttf');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('fonts/Raleway-Bold.ttf');
+  font-weight: 600;
+}
+
+body {
+  background-color: #fff9f2;
+  margin: 0;
+}
+
+.main-container {
+  min-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.logo-section {
+  display: inline-block;
+  width: 38%;
+  text-align: center;
+}
+
+.logo {
+  margin-top: 30vh;
+  width: 40%;
+  height: auto;
+}
+
+.title {
+  font-family: 'Sen';
+  font-weight: 600;
+  color: #322218;
+  margin: 0;
+  font-size: 7vw;
+}
+
+.details-section {
+  display: inline-block;
+  background-color: #322218;
+  width: 62%;
+  padding: 5rem;
+  /* box-sizing: border-box; */
+}
+
+.description {
+  font-family: 'Raleway';
+  color: #dcc6a5;
+  font-size: 2rem;
+}
+
+.emphasis {
+  color: #f0960e;
+}
+
+.repo {
+  font-family: 'Calibri';
+  color: #f0960e;
+}
+
+.button-container {
+  /* background-color: red; */
+  text-align: center;
+}
+
+.documentation {
+  display: inline-block;
+  cursor: pointer;
+  font-family: 'Sen';
+  font-weight: 800;
+  font-size: 3rem;
+  color: #322218;
+  background-color: #f0960e;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-top: 4rem;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  transition: all 0.1s;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0);
+  }
+  33% {
+    transform: rotate(-1deg);
+  }
+  66% {
+    transform: rotate(1deg);
+  }
+  100% {
+    transform: rotate(-1deg);
+  }
+}
+
+.documentation:hover {
+  font-size: 3.3rem;
+  margin-top: 3.8rem;
+  padding: 1.2rem 2.3rem;
+  animation: shake 0.2s;
+  box-shadow: 2px 10px 4px rgba(0, 0, 0, 0.2);
+}
