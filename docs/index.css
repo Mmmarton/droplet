@@ -46,6 +46,7 @@
 }
 
 .repo {
+  margin-top: 0;
   font-family: sans-serif;
   color: #f0960e;
 }
@@ -61,7 +62,6 @@
 
 .button-container {
   text-align: center;
-  /* background-color: red; */
   height: 9rem;
 }
 
@@ -86,4 +86,8 @@
   padding: 1.2rem 2.3rem;
   animation: shake 0.2s;
   box-shadow: 2px 10px 4px rgba(0, 0, 0, 0.2);
+}
+
+.get-it {
+  margin: 3rem 0 0 0;
 }
