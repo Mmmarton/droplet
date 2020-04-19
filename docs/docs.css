@@ -3,11 +3,11 @@ html {
 }
 
 .menu {
-  position: absolute;
+  position: fixed;
   top: 0;
   display: inline-block;
   background-color: #322218;
-  width: 10rem;
+  width: 11rem;
   border-bottom-right-radius: 10px;
 }
 
@@ -43,6 +43,7 @@ html {
   transition: all 0.1s;
   width: 8rem;
   height: 2rem;
+  letter-spacing: 2px;
 }
 
 .navigation a:hover {
@@ -54,4 +55,12 @@ html {
   margin: 8rem auto;
   width: 70%;
   padding-left: 10rem;
+  font-family: 'Raleway';
+  line-height: 1.4rem;
+  letter-spacing: 1px;
+}
+
+.content h1 {
+  padding-top: 4rem;
+  text-shadow: 1px 1px 2px rgba(241, 150, 14, 0.5);
 }
