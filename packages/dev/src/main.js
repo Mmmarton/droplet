@@ -153,9 +153,14 @@ function getObjectAttribute(object, attribute) {
 
   for (let property of properties) {
     if (property[property.length - 1] === ')') {
-      value = value[property.substring(0, property.length - 2)];
+      let [methodName, parameters] = property.split('(');
+      parameters = parameters.substring(0, parameters.length - 1).split(',');
+      parameters = parameters.map((parameter) =>
+        getObjectAttribute(object, parameter.trim())
+      );
+      value = value[methodName];
       if (value) {
-        value = value();
+        value = value(...parameters);
       }
     } else {
       if (value) {
@@ -523,23 +528,13 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  currentName = '';
-  names = ['Anne', 'Billy', 'Charlotte', 'Dan'];
-
+  names = ['Anne', 'Charlie'];
   constructor() {
     super(mainTemplate);
   }
 
-  setCurrentName(event) {
-    this.currentName = event.target.value;
-  }
-
-  addName() {
-    this.names = [...this.names, this.currentName];
-  }
-
-  removeName() {
-    this.names = this.names.filter((name) => name !== this.currentName);
+  shout(name, a) {
+    return 'dada(' + name + ',' + a + ')';
   }
 }
 
