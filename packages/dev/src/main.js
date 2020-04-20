@@ -3,6 +3,7 @@ import appleTemplate from './apple.html';
 import mainTemplate from './main.html';
 
 class Main extends Component {
+  count = 3;
   names = ['Anne', 'Charlie'];
   constructor() {
     super(mainTemplate);
@@ -10,6 +11,10 @@ class Main extends Component {
 
   shout(name, a) {
     return 'dada(' + name + ',' + a + ')';
+  }
+
+  doubleValue(value) {
+    return value * 2;
   }
 }
 

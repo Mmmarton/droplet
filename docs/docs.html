@@ -206,7 +206,52 @@ class Main extends Component {
 
 loadComponents(Main);
 setRoot(Main);</pre>
-      <b style="color: red;">PASSING ARGUMENTS TO METHODS</b>
+      There is also the case in which we want to use a method to genereate a
+      value and pass that value to the template. In that case we can simply
+      insert the method in the template just as we would with a property. The
+      only difference is that we must append a pair of parantheses at the end of
+      the method. See below.
+      <pre class="code">
+class Main extends Component {
+  counter = 0;
+
+  constructor() {
+    super('&ltdiv>{counter}, {<b>doubleValue()</b>}&lt/div>');
+    setInterval(() => {
+      this.counter++, 
+      1000
+    );
+  }
+
+  <b>doubleValue() {
+    return this.counter * 2;
+  }</b>
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
+      In many cases there is also a need to pass in arguments to the methods we
+      use in the template. We can do this by simply adding them between the
+      parantheses, separated by commas.
+      <pre class="code">
+class Main extends Component {
+  counter = 0;
+
+  constructor() {
+    super('&ltdiv>{counter}, {doubleValue(<b>counter</b>)}&lt/div>');
+    setInterval(() => {
+      this.counter++,
+      1000
+    );
+  }
+
+  <b>doubleValue(value) {
+    return value * 2;
+  }</b>
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
       <h2>Inter-component communication</h2>
       Every now and then we need to send data between components. Because what
       is the use of a bunch of components that can not relate to each other. To
