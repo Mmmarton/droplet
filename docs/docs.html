@@ -76,6 +76,20 @@ setRoot(Main);</pre
         the index.html. This implies that the index page should not contain any
         html because it will get overwritten.
       </p>
+      If using webpack or similar tools, the html can be loaded from external
+      files too. In that case the code would look something like this:
+      <pre class="code">
+import { default as template } from './main.html';
+
+class Main extends Component {
+  constructor() {
+    super(template);
+  }
+}
+
+loadComponents(Main);
+setRoot(Main);</pre
+      >
       <h2>Nested components</h2>
       Component nesting is as easy as declaring the template. For each component
       a tag is generated. The generated tag consists of the component name
