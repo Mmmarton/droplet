@@ -523,26 +523,29 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  counter = 0;
+  currentName = '';
+  names = ['Anne', 'Billy', 'Charlotte', 'Dan'];
 
   constructor() {
     super(mainTemplate);
   }
 
-  updateCounter(newValue) {
-    this.counter = newValue;
+  setCurrentName(event) {
+    this.currentName = event.target.value;
+  }
+
+  addName() {
+    this.names = [...this.names, this.currentName];
+  }
+
+  removeName() {
+    this.names = this.names.filter((name) => name !== this.currentName);
   }
 }
 
 class Apple extends Component {
-  counter = 0;
-
   constructor() {
     super(appleTemplate);
-    console.log(this.inputs);
-    setInterval(() => {
-      this.inputs.counter_updated(++this.counter);
-    }, 1000);
   }
 }
 

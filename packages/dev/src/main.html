@@ -1,4 +1,8 @@
-<div style="width: 300px; height: 90vh;">
-  Main counter: {counter} <br />
-  <apple counter_updated="{updateCounter}" />
+<div style="width: 350px; height: 90vh;">
+  <p>
+    Name: <input type="text" onchange="{setCurrentName}" />
+    <button onclick="{addName}">Add</button>
+    <button onclick="{removeName}">Remove</button>
+  </p>
+  <span *for="name of names"><apple name="{name}" /></span>
 </div>

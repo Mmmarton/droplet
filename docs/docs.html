@@ -161,10 +161,11 @@ class Main extends Component {
 loadComponents(Main);
 setRoot(Main);</pre>
       <p>
-        <b>Note: </b> Template property names should not use <i>camelCase</i> or
-        <i>kebab-case</i>. Our suggestion is <i>snake_case</i>. This is due to
-        the limitations of the html parser, which tarnsforms camel case into
-        lowercase and because kebab case properties are not valid in javascript.
+        <b>Note: </b> We suggest not using <i>camelCase</i> or
+        <i>kebab-case</i> for template property names. Our suggestion is
+        <i>snake_case</i>. This is due to the limitations of the html parser,
+        which tarnsforms camel case into lowercase and because kebab case
+        properties are not valid in javascript.
       </p>
       <h2>Getters and methods</h2>
       Say we want to display a counter but we also need another one that counts
@@ -259,102 +260,174 @@ setRoot(Main);</pre>
       updated from within the child. The method can also have parameters.
       <h1 id="events">Events</h1>
       We already saw how the template can be updated from the code, the other
-      side of the coin is passing data from the template to the component.
+      side of the coin is passing data from the template to the component. If we
+      want to handle events like click or an input change, we need to bind a
+      method to the change. We could do it this way:
+      <pre class="code">
+class Main extends Component {
+  <b>word = 'honey';</b>
+
+  constructor() {
+    super('&ltdiv>
+      <b>&ltp>{word}&lt/p>
+      &ltinput type="text" onchange="{updateWord}" /></b>
+    &lt/div>');
+  }
+
+  <b>updateWord(event) {
+    this.word = event.target.value;
+  }</b>
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
       <h1 id="ifcase">IF case</h1>
-      Quisque ut orci nec mauris tristique pretium non mattis felis. Quisque
-      egestas tempor tortor, a pretium tortor consequat quis. Suspendisse ex
-      tortor, iaculis ac mattis quis, condimentum eu nisi. Aliquam nisi elit,
-      ornare sit amet vulputate et, volutpat sit amet dolor. Vivamus venenatis
-      tortor sed eros dictum, ac aliquet nunc fringilla. Phasellus porta
-      condimentum nunc, sed ornare lacus laoreet sit amet. In sit amet placerat
-      sapien, at condimentum magna. Curabitur ex nisl, viverra sed est at,
-      posuere dignissim justo. Sed at interdum orci, eget tincidunt lacus. Nam
-      interdum est sed nulla porta finibus. Fusce dignissim mi ut metus viverra,
-      at egestas sem porttitor. Sed a convallis turpis. Lorem ipsum dolor sit
-      amet, consectetur adipiscing elit. Aliquam tincidunt gravida porta. Donec
-      suscipit quis magna a feugiat. Proin egestas erat in mi volutpat, eget
-      ornare nulla lobortis. Praesent vel tempus ipsum. Morbi non convallis
-      elit. Donec massa lacus, molestie vel hendrerit nec, mattis ut odio.
-      Aenean vitae egestas lorem. Sed at est ornare, tincidunt dui et,
-      ullamcorper elit. Donec in mauris at nisi efficitur aliquam quis eu massa.
-      Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-      inceptos himenaeos. Nulla eu nisl lobortis, tempus augue nec, iaculis
-      lorem. Suspendisse arcu risus, tempor in urna sit amet, luctus aliquam
-      quam. Aliquam erat volutpat. Cras convallis elit eget turpis dictum
-      molestie at eu velit. Aenean a augue convallis justo suscipit volutpat.
-      Praesent aliquet rhoncus mi at luctus. Aenean aliquet nisl blandit,
-      venenatis risus eu, faucibus ipsum. Aliquam eu sem dui. Nunc vestibulum
-      neque nibh. Nam eu elementum purus, id viverra sem. Proin eget commodo
-      lorem. Proin eget lacus lobortis, vestibulum nulla venenatis, auctor diam.
-      Sed turpis lorem, euismod quis lorem non, ultrices tincidunt tellus.
-      Mauris dignissim, sem eu scelerisque auctor, dui orci malesuada lacus, et
-      commodo nisi lorem suscipit nibh. Ut nec sagittis erat. Mauris dictum
-      malesuada lobortis.
+      In case you need an if case -no word play intended 😏- we've got you
+      covered. Talking about showing parts of the template conditionally. With a
+      custom property named <i>*if</i> you can dynamically hide or show elements
+      of the view. For the sake of example, let's toggle a div element based on
+      component property.
+      <pre class="code">
+class Main extends Component {
+  <b>isVisible = false;</b>
+
+  constructor() {
+    super('&ltdiv>
+      <b>&ltspan *if="isVisible">I can see you!&lt/span></b>
+    &lt/div>');
+    <b>setInterval(() => (this.isVisible = !this.isVisible), 1000);</b>
+  }
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
+      As you can see, the <i>*if</i> attribute is similar to the custom tag
+      properties, differing only through the asterisk in front of it. We can
+      observe also, that there is no curly braces around the passed variable.
+      This is because the <i>*if</i> property supports only variable inputs and
+      thus, the value passed in is automatically considered a variable. This
+      special behavior applies only to two tag properties: the <i>*if</i> and
+      the <i>*for</i>. <br />
+      Also worth mentioning, the <i>*if</i> should be placed only on standard
+      HTML elements and not custom components. If components' visibility needs
+      to be changed dynamically, they can be wrapped in a HTML element on which
+      the <i>*if</i> property is applied. This will produce the desired effect
+      of hiding or showing the component on demand. Also worth mentioning
+      related to components, they are hidden and not destroyed. This means that
+      async methods within them are still active and may function internally. A
+      simple example may illustrate this behavior more clearly:
+      <pre class="code">
+class Main extends Component {
+  <b>isVisible = true;</b>
+
+  constructor() {
+    super('&ltdiv>
+      <b>&ltspan *if="isVisible">
+        &ltbig-red-box/>
+      &lt/span></b>
+    &lt/div>');
+    <b>setInterval(() => this.isVisible = !this.isVisible, 1000);</b>
+  }
+  
+}
+
+class BigRedBox extends Component {
+  <b>counter = 0;</b>
+
+  constructor() {
+    super('&ltdiv>BIG BOX <b>{counter}</b>&lt/div>');
+    <b>setInterval(() => this.counter++, 500);</b>
+  }
+}
+
+loadComponents(Main, BigRedBox);
+setRoot(Main);</pre>
+      In the example above the component's visibility is toggled on and off
+      every second. The child component also has a counter within, which is
+      updated twice a second. If you try it out, you can see that after
+      dissapearing and reappearing, the counter will not continue from where it
+      left off before dissapearing. It will count indifferently of the
+      component's visibility.
       <h1 id="forloop">FOR loop</h1>
-      Nulla id erat ac tortor commodo gravida eget quis ex. Orci varius natoque
-      penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec
-      et egestas risus. Suspendisse nec magna consectetur, aliquam neque sit
-      amet, varius dui. Integer id porttitor orci. Praesent sed odio mi.
-      Vestibulum at lacinia metus. Aliquam sem nunc, dictum quis massa
-      ultricies, venenatis faucibus nulla. Vestibulum pellentesque ligula
-      pretium eleifend commodo. In pellentesque eget lectus nec dapibus. Cras
-      mattis vitae quam sit amet rutrum. Maecenas eu fringilla lacus, tempus
-      rutrum ante. Maecenas nec lacus molestie, fermentum eros ultrices, posuere
-      tellus. Praesent facilisis viverra felis, vitae hendrerit nulla pretium
-      non. In hac habitasse platea dictumst. Donec sit amet scelerisque nisi,
-      nec dictum augue. Duis lobortis turpis massa. Nam et rutrum orci. Sed
-      sollicitudin ante at posuere feugiat. Nunc nec erat id metus mollis
-      mattis. Cras vitae rutrum arcu. Nullam semper at turpis at placerat.
-      Maecenas fringilla efficitur ex, id vestibulum leo lacinia sit amet. Morbi
-      euismod vulputate lacus, non tristique eros sagittis ac. Donec ac lorem
-      lacinia, bibendum tellus quis, varius felis. Integer in lacus consectetur,
-      feugiat leo sollicitudin, maximus mi. Proin placerat interdum nunc id
-      scelerisque. Nam lobortis velit et vulputate porttitor. Praesent tellus
-      magna, ultrices ut nisl a, pellentesque pretium nulla. Mauris quam sapien,
-      tincidunt at commodo id, facilisis semper augue. In magna dui, tempor in
-      gravida eget, pretium sed leo. Aenean imperdiet, ipsum eget iaculis
-      suscipit, eros augue dignissim est, interdum euismod tortor lacus vitae
-      nisl. Morbi bibendum nec felis eu feugiat. Phasellus posuere urna mi, et
-      dapibus urna tempor id. Integer ullamcorper venenatis ex, id luctus est.
-      Fusce sed mattis magna, eu auctor lectus. Sed venenatis, sapien feugiat
-      fringilla facilisis, neque augue commodo ligula, quis consectetur eros
-      velit dignissim quam. Nulla mattis, est vitae lacinia vestibulum, risus
-      magna pharetra lorem, a placerat urna velit ut leo. Phasellus ac sem
-      velit. Cras sit amet porttitor purus, vitae euismod quam. Praesent nec
-      nunc sit amet sem rutrum facilisis vitae a quam. Proin congue ex a risus
-      pulvinar, a viverra massa pulvinar. Proin id ligula dui. Mauris vel
-      aliquam purus, tincidunt eleifend ex. Integer nec turpis odio. Vestibulum
-      iaculis pellentesque odio vitae suscipit. Nulla at convallis augue. Proin
-      fringilla ornare magna, eu feugiat tellus egestas eu. Integer hendrerit
-      nisl at tincidunt accumsan. Nunc at lacus nec justo interdum eleifend eu
-      ac nisl. Pellentesque condimentum, ligula vitae finibus rhoncus, elit orci
-      scelerisque lacus, at feugiat est nunc eget orci. In consequat sem dui, in
-      tristique neque feugiat vitae. Nullam interdum faucibus quam, in fringilla
-      metus tempor quis. Maecenas pharetra est non turpis vulputate tincidunt.
-      Donec feugiat urna a ligula sodales lobortis sit amet nec massa. Aliquam
-      molestie porttitor purus nec sagittis. Quisque aliquam mi ligula, quis
-      hendrerit velit sagittis sit amet. In non arcu id diam finibus pharetra
-      commodo ut urna. Nullam ac pharetra diam. Duis dictum, nibh eu cursus
-      fermentum, felis neque cursus nunc, ac egestas lorem urna euismod felis.
-      Quisque vestibulum nisl a magna pretium fringilla. Ut fringilla est risus,
-      quis imperdiet diam suscipit in. Maecenas pellentesque lorem nec augue
-      dapibus tincidunt. Morbi ullamcorper sapien non nunc maximus, at fringilla
-      urna dictum. Suspendisse ullamcorper, nulla ut blandit ornare, erat risus
-      porta mauris, et finibus nulla neque ac tortor. Nunc nec felis elementum,
-      aliquet ligula at, egestas massa. Integer eu lacus et tortor mollis
-      porttitor sit amet a magna. Integer leo mi, lobortis ac dolor eget,
-      maximus vestibulum enim. Cras quis nunc vitae ex laoreet hendrerit. Aenean
-      malesuada, magna at maximus pretium, nunc ante rhoncus lacus, a hendrerit
-      nunc quam et turpis. Donec a velit sed felis sagittis malesuada nec
-      elementum felis. Suspendisse ipsum augue, fermentum sit amet iaculis quis,
-      eleifend vitae tortor. Morbi sed iaculis eros. Aenean condimentum finibus
-      lacinia. Sed ipsum justo, efficitur vel lorem sit amet, commodo accumsan
-      elit. Orci varius natoque penatibus et magnis dis parturient montes,
-      nascetur ridiculus mus. Morbi semper, quam ut commodo sagittis, turpis est
-      suscipit magna, ac cursus turpis nulla non ex. Sed varius nisl tellus, ut
-      mollis eros gravida non. Nunc commodo maximus nibh, vitae gravida dolor
-      vulputate ac. Phasellus orci felis, vehicula dapibus varius in, tincidunt
-      nec lorem. Curabitur tristique interdum neque in tincidunt.
+      Imagine the scenario where you have a list of elements on your page, all
+      differing only by some properties, but essentially the same. Let's say you
+      have a hundred such elements. What do you do? Exactly for these scenarios
+      we have the custom property <i>*for</i>. Let's take a simple example. We
+      have a list of names and want to display them in some kind of container.
+      <pre class="code">
+class Main extends Component {
+  <b>names = ['Anne', 'Billy', 'Charlotte', 'Dan'];</b>
+
+  constructor() {
+    super('&ltdiv>
+      <b>&ltspan *for="name of names">
+        &ltbig-red-box name={name}/>
+      &lt/span></b>
+    &lt/div>');
+  }
+  
+}
+
+class BigRedBox extends Component {
+  constructor() {
+    super('&ltdiv>BIG BOX <b>{inputs.name}</b>&lt/div>');
+  }
+}
+
+loadComponents(Main, BigRedBox);
+setRoot(Main);</pre>
+      In the example we take the <i>names</i> list and pass it to the
+      <i>*for</i> property. In order to iterate the items, we need to use the
+      syntax: <i>*for="element of elements"</i>. We can access then the
+      <i>element</i> from all the tags within the one with <i>*for</i>. <br />
+      Similar to the <i>*if</i> property, the <i>*for</i> should be placed only
+      on standard HTML elements and not custom components. If components need to
+      be generated dynamically, they can be wrapped in a HTML element on which
+      the <i>*for</i> property is applied. Keep in mind that arrays are objects
+      in javascript, therefore if we simply edit their elements their reference
+      stays the same. If we want to add or remove elements, we need to update
+      the reference too. The example below shows a possible way to add a name
+      from an input and to remove the given name from the list.
+      <pre class="code">
+class Main extends Component {
+  <b>currentName = '';
+  names = ['Anne', 'Billy', 'Charlotte', 'Dan'];</b>
+
+  constructor() {
+    super('&ltdiv>
+      <b>&ltp>
+        Name: &ltinput type="text" onchange="{setCurrentName}" />
+        &ltbutton onclick="{addName}">Add&lt/button>
+        &ltbutton onclick="{removeName}">Remove&lt/button>
+      &lt/p>
+      &ltspan *for="name of names">
+        &ltbig-red-box name={name}/>
+      &lt/span></b>
+    &lt/div>');
+  }
+
+  <b>setCurrentName(event) {
+    this.currentName = event.target.value;
+  }
+
+  addName() {
+    this.names = [...this.names, this.currentName];
+  }
+
+  removeName() {
+    this.names = this.names.filter((name) => name !== this.currentName);
+  }</b>
+
+}
+
+class BigRedBox extends Component {
+  constructor() {
+    super('&ltdiv>BIG BOX {inputs.name}&lt/div>');
+  }
+}
+
+loadComponents(Main, BigRedBox);
+setRoot(Main);</pre>
     </section>
   </body>
 </html>
