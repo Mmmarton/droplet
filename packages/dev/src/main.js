@@ -492,7 +492,6 @@ function loadComponents(...components) {
 function createProxy(object) {
   return new Proxy(object, {
     set(target, name, value) {
-      console.log('update', name, value);
       target[name] = value;
       processQueue.add({
         node: object.template,
@@ -524,42 +523,26 @@ class Component {
 
 //BEGIN------------------------------app-----------------------------------
 class Main extends Component {
-  list = [1, 2];
-  secret = 'shhh';
-  show = true;
-  style = 'color: teal';
-  counter = { current: 2 };
+  counter = 0;
 
   constructor() {
     super(mainTemplate);
-    setInterval(() => {
-      this.counter = { ...this.counter, current: this.counter.current + 1 };
-      console.log(this.counter);
-    }, 1000);
   }
 
-  changeList() {
-    this.list = [];
-    const max = Math.random() * 10;
-    for (let i = 0; i < max; i++) {
-      this.list.push(Math.floor(Math.random() * 10));
-    }
-  }
-
-  decrease() {
-    console.log('NOOO');
+  updateCounter(newValue) {
+    this.counter = newValue;
   }
 }
 
 class Apple extends Component {
-  count = 10;
+  counter = 0;
 
   constructor() {
     super(appleTemplate);
-  }
-
-  decrease() {
-    console.log('DECREASE');
+    console.log(this.inputs);
+    setInterval(() => {
+      this.inputs.counter_updated(++this.counter);
+    }, 1000);
   }
 }
 

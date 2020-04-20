@@ -85,3 +85,7 @@ html {
   padding: 1rem;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+.code b {
+  color: #322218;
+}

@@ -1,7 +1,4 @@
 <div style="width: 300px; height: 90vh;">
-  <button onclick="{changeList}">Change</button>
-  <div *for="element of list">
-    <button onclick="{decrease}" style="{style}">decrease {element}</button>
-  </div>
-  {counter.current}
+  Main counter: {counter} <br />
+  <apple counter_updated="{updateCounter}" />
 </div>

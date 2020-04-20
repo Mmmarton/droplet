@@ -130,7 +130,7 @@ setRoot(Main);</pre>
       Nice and easy. Isn't it? 🙂 <br />
       <p>
         Properties are linked to the template by the usage of curly braces
-        ('<b>{</b>...<b>}</b>'). The contents of the braces are considered a
+        ("<b>{</b>...<b>}</b>"). The contents of the braces are considered a
         property of the linked component. Linking is done through their name so
         they need to have the same name as defined in the component. Updates are
         handled automatically, there is no need to tellthe components explicitly
@@ -138,8 +138,8 @@ setRoot(Main);</pre>
         the example shows.
       </p>
       Properties can be defined as simple class properties. They can be either
-      perimitives or objects. Primitives can be updated through assignments as
-      the previous example shows. Object however, being kept by reference, need
+      primitives or objects. Primitives can be updated through assignments as
+      the previous example shows. Objects however, being kept by reference, need
       reassignment in order for the template to update. <br />
       If we have an object property, we can update is as follows:
       <pre class="code">
@@ -160,72 +160,106 @@ class Main extends Component {
 
 loadComponents(Main);
 setRoot(Main);</pre>
-<h2></h2>
+      <p>
+        <b>Note: </b> Template property names should not use <i>camelCase</i> or
+        <i>kebab-case</i>. Our suggestion is <i>snake_case</i>. This is due to
+        the limitations of the html parser, which tarnsforms camel case into
+        lowercase and because kebab case properties are not valid in javascript.
+      </p>
+      <h2>Getters and methods</h2>
+      Say we want to display a counter but we also need another one that counts
+      every secont tick only. We could use another property for it, but it may
+      not be the best choice in all scenarios. In these cases we could use
+      getter methods. Here is an example of a getter for the mentioned scenario:
+      <pre class="code">
+class Main extends Component {
+  counter = 0;
+
+  constructor() {
+    super('&ltdiv><b>{counter}, {halfCounter}</b>&lt/div>');
+    setInterval(() => {
+      this.counter++, 
+      1000
+    );
+  }
+
+  <b>get halfCounter() {
+    return Math.floor(this.counter / 2);
+  }</b>
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
+      <b style="color: red;">PASSING ARGUMENTS TO METHODS</b>
+      <h2>Inter-component communication</h2>
+      Every now and then we need to send data between components. Because what
+      is the use of a bunch of components that can not relate to each other. To
+      send data between a component and one of its childen, we can use custom
+      properties combined with the <i>inputs</i> property. By default each
+      component has a property named <i>inputs</i>. It is an object that holds
+      all the custom inputs it receives. Let's see how does it look like in an
+      example.
+      <pre class="code">
+class Main extends Component {
+  word = 'Art';
+
+  constructor() {
+    super('&ltdiv>Main {word} and &ltbig-red-box <b>thought={word}</b>/>&lt/div>');
+  }
+}
+
+class BigRedBox extends Component {
+  constructor() {
+    super('&ltdiv>BIG BOX <b>{inputs.thought}</b>&lt/div>');
+  }
+}
+
+loadComponents(Main, BigRedBox);
+setRoot(Main);</pre
+      >
+      Notice that the child does not need to do anything, it can use the
+      supplied data as-is. It can also use it in the component or transform it
+      through a getter and then supply it to the view. <br />
+      Also, as the example shows, the input variable name and the input name
+      need not be the same. In the code example above the variable name is
+      <i>word</i> in the parent component while the input used in the child is
+      named <i>thought</i>.
+      <p>
+        Now let's see how can we send data backwards, from a child component to
+        the parent.
+      </p>
+      <pre class="code">
+class Main extends Component {
+  <b>word = 'First';</b>
+
+  constructor() {
+    super('&ltdiv>Main {word} and &ltbig-red-box <b>change_word={updateWord}</b>/>&lt/div>');
+  }
+
+  <b>updateWord(newWord) {
+    this.word = newWord;
+  }</b>
+  
+}
+
+class BigRedBox extends Component {
+  constructor() {
+    super('&ltdiv>BIG BOX&lt/div>');
+    <b>this.inputs.change_word('Shiny');</b>
+  }
+}
+
+loadComponents(Main, BigRedBox);
+setRoot(Main);</pre>
+      Let's see what happened there. Looks pretty similar to the parent-child
+      communication we saw earlier. Actually it has the same form. The
+      difference is only in <i>what</i> we send. If we need to send a property
+      to a child, we send it through the inputs. If we want to get data from a
+      child, we give it a method which can be called, and thus the parent
+      updated from within the child. The method can also have parameters.
       <h1 id="events">Events</h1>
-      Nulla id erat ac tortor commodo gravida eget quis ex. Orci varius natoque
-      penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec
-      et egestas risus. Suspendisse nec magna consectetur, aliquam neque sit
-      amet, varius dui. Integer id porttitor orci. Praesent sed odio mi.
-      Vestibulum at lacinia metus. Aliquam sem nunc, dictum quis massa
-      ultricies, venenatis faucibus nulla. Vestibulum pellentesque ligula
-      pretium eleifend commodo. In pellentesque eget lectus nec dapibus. Cras
-      mattis vitae quam sit amet rutrum. Maecenas eu fringilla lacus, tempus
-      rutrum ante. Maecenas nec lacus molestie, fermentum eros ultrices, posuere
-      tellus. Praesent facilisis viverra felis, vitae hendrerit nulla pretium
-      non. In hac habitasse platea dictumst. Donec sit amet scelerisque nisi,
-      nec dictum augue. Duis lobortis turpis massa. Nam et rutrum orci. Sed
-      sollicitudin ante at posuere feugiat. Nunc nec erat id metus mollis
-      mattis. Cras vitae rutrum arcu. Nullam semper at turpis at placerat.
-      Maecenas fringilla efficitur ex, id vestibulum leo lacinia sit amet. Morbi
-      euismod vulputate lacus, non tristique eros sagittis ac. Donec ac lorem
-      lacinia, bibendum tellus quis, varius felis. Integer in lacus consectetur,
-      feugiat leo sollicitudin, maximus mi. Proin placerat interdum nunc id
-      scelerisque. Nam lobortis velit et vulputate porttitor. Praesent tellus
-      magna, ultrices ut nisl a, pellentesque pretium nulla. Mauris quam sapien,
-      tincidunt at commodo id, facilisis semper augue. In magna dui, tempor in
-      gravida eget, pretium sed leo. Aenean imperdiet, ipsum eget iaculis
-      suscipit, eros augue dignissim est, interdum euismod tortor lacus vitae
-      nisl. Morbi bibendum nec felis eu feugiat. Phasellus posuere urna mi, et
-      dapibus urna tempor id. Integer ullamcorper venenatis ex, id luctus est.
-      Fusce sed mattis magna, eu auctor lectus. Sed venenatis, sapien feugiat
-      fringilla facilisis, neque augue commodo ligula, quis consectetur eros
-      velit dignissim quam. Nulla mattis, est vitae lacinia vestibulum, risus
-      magna pharetra lorem, a placerat urna velit ut leo. Phasellus ac sem
-      velit. Cras sit amet porttitor purus, vitae euismod quam. Praesent nec
-      nunc sit amet sem rutrum facilisis vitae a quam. Proin congue ex a risus
-      pulvinar, a viverra massa pulvinar. Proin id ligula dui. Mauris vel
-      aliquam purus, tincidunt eleifend ex. Integer nec turpis odio. Vestibulum
-      iaculis pellentesque odio vitae suscipit. Nulla at convallis augue. Proin
-      fringilla ornare magna, eu feugiat tellus egestas eu. Integer hendrerit
-      nisl at tincidunt accumsan. Nunc at lacus nec justo interdum eleifend eu
-      ac nisl. Pellentesque condimentum, ligula vitae finibus rhoncus, elit orci
-      scelerisque lacus, at feugiat est nunc eget orci. In consequat sem dui, in
-      tristique neque feugiat vitae. Nullam interdum faucibus quam, in fringilla
-      metus tempor quis. Maecenas pharetra est non turpis vulputate tincidunt.
-      Donec feugiat urna a ligula sodales lobortis sit amet nec massa. Aliquam
-      molestie porttitor purus nec sagittis. Quisque aliquam mi ligula, quis
-      hendrerit velit sagittis sit amet. In non arcu id diam finibus pharetra
-      commodo ut urna. Nullam ac pharetra diam. Duis dictum, nibh eu cursus
-      fermentum, felis neque cursus nunc, ac egestas lorem urna euismod felis.
-      Quisque vestibulum nisl a magna pretium fringilla. Ut fringilla est risus,
-      quis imperdiet diam suscipit in. Maecenas pellentesque lorem nec augue
-      dapibus tincidunt. Morbi ullamcorper sapien non nunc maximus, at fringilla
-      urna dictum. Suspendisse ullamcorper, nulla ut blandit ornare, erat risus
-      porta mauris, et finibus nulla neque ac tortor. Nunc nec felis elementum,
-      aliquet ligula at, egestas massa. Integer eu lacus et tortor mollis
-      porttitor sit amet a magna. Integer leo mi, lobortis ac dolor eget,
-      maximus vestibulum enim. Cras quis nunc vitae ex laoreet hendrerit. Aenean
-      malesuada, magna at maximus pretium, nunc ante rhoncus lacus, a hendrerit
-      nunc quam et turpis. Donec a velit sed felis sagittis malesuada nec
-      elementum felis. Suspendisse ipsum augue, fermentum sit amet iaculis quis,
-      eleifend vitae tortor. Morbi sed iaculis eros. Aenean condimentum finibus
-      lacinia. Sed ipsum justo, efficitur vel lorem sit amet, commodo accumsan
-      elit. Orci varius natoque penatibus et magnis dis parturient montes,
-      nascetur ridiculus mus. Morbi semper, quam ut commodo sagittis, turpis est
-      suscipit magna, ac cursus turpis nulla non ex. Sed varius nisl tellus, ut
-      mollis eros gravida non. Nunc commodo maximus nibh, vitae gravida dolor
-      vulputate ac. Phasellus orci felis, vehicula dapibus varius in, tincidunt
-      nec lorem. Curabitur tristique interdum neque in tincidunt.
+      We already saw how the template can be updated from the code, the other
+      side of the coin is passing data from the template to the component.
       <h1 id="ifcase">IF case</h1>
       Quisque ut orci nec mauris tristique pretium non mattis felis. Quisque
       egestas tempor tortor, a pretium tortor consequat quis. Suspendisse ex
