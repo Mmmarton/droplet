@@ -1,6 +1,6 @@
 import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
-import { default as appleTemplate } from './apple.html';
-import { default as mainTemplate } from './main.html';
+import appleTemplate from './apple.html';
+import mainTemplate from './main.html';
 
 class Main extends Component {
   names = ['Anne', 'Charlie'];
