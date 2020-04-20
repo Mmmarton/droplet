@@ -294,7 +294,6 @@ function updateForNode(node, object) {
     list
   );
 
-  //add the stuff
   for (let i = additions.length - 1; i >= 0; i--) {
     if (additions[i].content.insertAfterNode) {
       additions[i].content.insertAfterNode =
@@ -305,7 +304,6 @@ function updateForNode(node, object) {
     if (!additions[i].content.DOMNode) {
       additions[i].content = {
         ...additions[i].content,
-        // merge with for variables
         ...duplicateNode(node.content),
       };
       updates.push(additions[i]);
@@ -407,21 +405,16 @@ function updateForLoopElements(elementPointer, list) {
 function updateIfNode(node, object) {
   let field = node.expression;
   let directLogic = true;
+
   if (field[0] === '!') {
     directLogic = false;
     field = field.substring(1);
   }
 
-  if (!object.hasOwnProperty(field)) {
-    console.warn(
-      `Possible template issue: the field ${field} is not part of the object ${object.constructor.name}.`
-    );
-  }
-
   let objectAttribute = getObjectAttribute(object, field);
   let isTrue =
     typeof objectAttribute == 'function' ? objectAttribute() : objectAttribute;
-  if (isTrue == directLogic) {
+  if (isTrue && directLogic) {
     if (node.oldDOMNode && node.active !== true) {
       node.active = true;
       node.content.newDOMNode = node.oldDOMNode;
