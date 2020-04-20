@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/NuttyYokel/droplet/compare/@csereimarton/dev@1.1.0...@csereimarton/dev@1.2.0) (2020-04-20)
+
+
+### Bug Fixes
+
+* invert if logic ([3612987](https://github.com/NuttyYokel/droplet/commit/3612987f4eaefd8be6b6e48dcc5d53357134f4a5))
+* update newly added for elements ([ed17e2f](https://github.com/NuttyYokel/droplet/commit/ed17e2f4378d5d1df1eef81c47c3cf12b802a9eb))
+
+
+### Features
+
+* change base node model ([35fa6f3](https://github.com/NuttyYokel/droplet/commit/35fa6f39947d6a72d655476a4dc209a5ea759e8a))
+* fuse deletions into a single, final array ([0cda9b4](https://github.com/NuttyYokel/droplet/commit/0cda9b49de3f811e0f68d6650af607bf380ba361))
+* handle in-template executable function parameters ([4126420](https://github.com/NuttyYokel/droplet/commit/4126420184da9d45fe1a62d478fbddc9331900e2))
+* implement buffer dom tree ([a477cbe](https://github.com/NuttyYokel/droplet/commit/a477cbe6751d430169c87777ea6a5bec053adb8e))
+* implement render pipeline ([754f9e8](https://github.com/NuttyYokel/droplet/commit/754f9e86ba08b4a9173bdf9152777d2a451195d0))
+* initial for loop ([dc148a2](https://github.com/NuttyYokel/droplet/commit/dc148a2c6a62d76380fe5883b68e290546baa6dc))
+* isolate for list element changes ([14688f6](https://github.com/NuttyYokel/droplet/commit/14688f6ad5b72fc4729e219b82a05c58fc06b949))
+* make a basic if work ([7c90cb1](https://github.com/NuttyYokel/droplet/commit/7c90cb1121ab2e5667a1ead897a7fb6258dff573))
+* set up a kind-of-working for loop ([5f5f577](https://github.com/NuttyYokel/droplet/commit/5f5f577227f7d7953b9737dcf78009caaae8755d))
+* support inter-component communication ([1ffb473](https://github.com/NuttyYokel/droplet/commit/1ffb473f1ae9a950f606c37b673136ef1163b98b))
+
+
+
+
+
 # [1.1.0](https://github.com/NuttyYokel/droplet/compare/@csereimarton/dev@1.0.1...@csereimarton/dev@1.1.0) (2020-01-21)
 
 
