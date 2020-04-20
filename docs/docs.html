@@ -15,7 +15,7 @@
         <h1 class="title">Droplet</h1>
       </a>
       <section class="navigation">
-        <a href="#components">Components</a>
+        <a href="#basics">Basics</a>
         <a href="#properties">Properties</a>
         <a href="#events">Events</a>
         <a href="#ifcase">IF case</a>
@@ -24,7 +24,7 @@
       </section>
     </section>
     <section class="content">
-      <h1 id="components">Components</h1>
+      <h1 id="basics">Basics</h1>
       <p>
         You look at a design, see a dozen sections that look the same but have
         different data. Would be nice to write the template once and add it
@@ -62,6 +62,8 @@
         A minimal setup would look something like this:
       </p>
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   constructor() {
     super('&ltdiv>Main&lt/div>');
@@ -79,7 +81,8 @@ setRoot(Main);</pre
       If using webpack or similar tools, the html can be loaded from external
       files too. In that case the code would look something like this:
       <pre class="code">
-import template from './main.html';
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+<b>import template from './main.html';</b>
 
 class Main extends Component {
   constructor() {
@@ -88,8 +91,7 @@ class Main extends Component {
 }
 
 loadComponents(Main);
-setRoot(Main);</pre
-      >
+setRoot(Main);</pre>
       <h2>Nested components</h2>
       Component nesting is as easy as declaring the template. For each component
       a tag is generated. The generated tag consists of the component name
@@ -101,6 +103,8 @@ setRoot(Main);</pre
       template because this would lead to recurion. <br />
       We can set up a child component within our main component as follows:
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   constructor() {
     super('&ltdiv>Main<b> and &ltbig-red-box/></b>&lt/div>');
@@ -134,6 +138,8 @@ setRoot(Main);</pre>
       add a spin to it and make it update every second or so. Still, doable from
       HTML but let's see how would it look like with Droplet.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>counter = 0;</b>
 
@@ -161,18 +167,19 @@ setRoot(Main);</pre>
       reassignment in order for the template to update. <br />
       If we have an object property, we can update is as follows:
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>counter = {current: 0};</b>
 
   constructor() {
     super('&ltdiv><b>{counter.current}</b>&lt/div>');
     <b>setInterval(() => {
-      this.counter = { 
+      this.counter = {
         ...this.counter,
-        current: this.counter.current + 1 
-      }, 
-      1000
-    );</b>
+        current: this.counter.current + 1,
+      };
+    }, 1000);</b>
   }
 }
 
@@ -191,15 +198,16 @@ setRoot(Main);</pre>
       not be the best choice in all scenarios. In these cases we could use
       getter methods. Here is an example of a getter for the mentioned scenario:
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   counter = 0;
 
   constructor() {
     super('&ltdiv><b>{counter}, {halfCounter}</b>&lt/div>');
     setInterval(() => {
-      this.counter++, 
-      1000
-    );
+      this.counter++;
+    }, 1000);
   }
 
   <b>get halfCounter() {
@@ -215,15 +223,16 @@ setRoot(Main);</pre>
       only difference is that we must append a pair of parantheses at the end of
       the method. See below.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   counter = 0;
 
   constructor() {
     super('&ltdiv>{counter}, {<b>doubleValue()</b>}&lt/div>');
     setInterval(() => {
-      this.counter++, 
-      1000
-    );
+      this.counter++;
+    }, 1000);
   }
 
   <b>doubleValue() {
@@ -237,15 +246,16 @@ setRoot(Main);</pre>
       use in the template. We can do this by simply adding them between the
       parantheses, separated by commas.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   counter = 0;
 
   constructor() {
     super('&ltdiv>{counter}, {doubleValue(<b>counter</b>)}&lt/div>');
     setInterval(() => {
-      this.counter++,
-      1000
-    );
+      this.counter++;
+    }, 1000);
   }
 
   <b>doubleValue(value) {
@@ -264,11 +274,13 @@ setRoot(Main);</pre>
       all the custom inputs it receives. Let's see how does it look like in an
       example.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   word = 'Art';
 
   constructor() {
-    super('&ltdiv>Main {word} and &ltbig-red-box <b>thought={word}</b>/>&lt/div>');
+    super('&ltdiv>Main {word} and &ltbig-red-box <b>thought="{word}"</b>/>&lt/div>');
   }
 }
 
@@ -293,11 +305,13 @@ setRoot(Main);</pre
         the parent.
       </p>
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>word = 'First';</b>
 
   constructor() {
-    super('&ltdiv>Main {word} and &ltbig-red-box <b>change_word={updateWord}</b>/>&lt/div>');
+    super('&ltdiv>Main {word} and &ltbig-red-box <b>change_word="{updateWord}"</b>/>&lt/div>');
   }
 
   <b>updateWord(newWord) {
@@ -309,7 +323,9 @@ class Main extends Component {
 class BigRedBox extends Component {
   constructor() {
     super('&ltdiv>BIG BOX&lt/div>');
-    <b>this.inputs.change_word('Shiny');</b>
+    <b>setTimeout(() => {
+      this.inputs.change_word('Shiny');
+    }, 1000);</b>
   }
 }
 
@@ -321,20 +337,26 @@ setRoot(Main);</pre>
       to a child, we send it through the inputs. If we want to get data from a
       child, we give it a method which can be called, and thus the parent
       updated from within the child. The method can also have parameters.
+      <p>
+        <b>Note: </b> The <i>inputs</i> property is empty at the moment the
+        component is built.
+      </p>
       <h1 id="events">Events</h1>
       We already saw how the template can be updated from the code, the other
       side of the coin is passing data from the template to the component. If we
       want to handle events like click or an input change, we need to bind a
       method to the change. We could do it this way:
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>word = 'honey';</b>
 
   constructor() {
-    super('&ltdiv>
+    super(`&ltdiv>
       <b>&ltp>{word}&lt/p>
       &ltinput type="text" onchange="{updateWord}" /></b>
-    &lt/div>');
+    &lt/div>`);
   }
 
   <b>updateWord(event) {
@@ -351,13 +373,15 @@ setRoot(Main);</pre>
       of the view. For the sake of example, let's toggle a div element based on
       component property.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>isVisible = false;</b>
 
   constructor() {
-    super('&ltdiv>
+    super(`&ltdiv>
       <b>&ltspan *if="isVisible">I can see you!&lt/span></b>
-    &lt/div>');
+    &lt/div>`);
     <b>setInterval(() => (this.isVisible = !this.isVisible), 1000);</b>
   }
 }
@@ -380,15 +404,17 @@ setRoot(Main);</pre>
       async methods within them are still active and may function internally. A
       simple example may illustrate this behavior more clearly:
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>isVisible = true;</b>
 
   constructor() {
-    super('&ltdiv>
+    super(`&ltdiv>
       <b>&ltspan *if="isVisible">
         &ltbig-red-box/>
       &lt/span></b>
-    &lt/div>');
+    &lt/div>`);
     <b>setInterval(() => this.isVisible = !this.isVisible, 1000);</b>
   }
   
@@ -418,15 +444,17 @@ setRoot(Main);</pre>
       we have the custom property <i>*for</i>. Let's take a simple example. We
       have a list of names and want to display them in some kind of container.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>names = ['Anne', 'Billy', 'Charlotte', 'Dan'];</b>
 
   constructor() {
-    super('&ltdiv>
+    super(`&ltdiv>
       <b>&ltspan *for="name of names">
-        &ltbig-red-box name={name}/>
+        &ltbig-red-box name="{name}"/>
       &lt/span></b>
-    &lt/div>');
+    &lt/div>`);
   }
   
 }
@@ -452,21 +480,23 @@ setRoot(Main);</pre>
       the reference too. The example below shows a possible way to add a name
       from an input and to remove the given name from the list.
       <pre class="code">
+import { Component, loadComponents, setRoot } from '@csereimarton/droplet';
+
 class Main extends Component {
   <b>currentName = '';
   names = ['Anne', 'Billy', 'Charlotte', 'Dan'];</b>
 
   constructor() {
-    super('&ltdiv>
+    super(`&ltdiv>
       <b>&ltp>
         Name: &ltinput type="text" onchange="{setCurrentName}" />
         &ltbutton onclick="{addName}">Add&lt/button>
         &ltbutton onclick="{removeName}">Remove&lt/button>
       &lt/p>
       &ltspan *for="name of names">
-        &ltbig-red-box name={name}/>
+        &ltbig-red-box name="{name}"/>
       &lt/span></b>
-    &lt/div>');
+    &lt/div>`);
   }
 
   <b>setCurrentName(event) {

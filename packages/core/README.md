@@ -1,5 +1,11 @@
 ### Droplet
 
-Droplet is a minimal JavaScript library for creating user interfaces.
+Droplet is a minimal JavaScript library for creating component based user interfaces.
 
-The **droplet** package contains the core functionality.
+#### Installation
+
+run `npm install @csereimarton/droplet`
+
+#### Documentation
+
+[nuttyyokel.github.io/droplet/](https://nuttyyokel.github.io/droplet/)
