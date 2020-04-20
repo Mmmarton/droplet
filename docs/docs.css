@@ -8,7 +8,7 @@ html {
   display: inline-block;
   background-color: #322218;
   width: 11rem;
-  border-bottom-right-radius: 3px;
+  height: 100vh;
 }
 
 .logo {
