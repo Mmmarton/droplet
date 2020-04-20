@@ -58,6 +58,7 @@ html {
   font-family: 'Raleway';
   line-height: 1.4rem;
   letter-spacing: 1px;
+  padding-bottom: 30vh;
 }
 
 .content h1 {
@@ -88,4 +89,22 @@ html {
 
 .code b {
   color: #322218;
+}
+
+.repolink {
+  color: #f0960e;
+  font-weight: 800;
+}
+
+.repolink:hover {
+  text-decoration: underline;
+}
+
+.footer {
+  display: block;
+  font-family: 'Raleway';
+  background-color: #322218;
+  color: #f0960e;
+  padding: 0.3rem 1rem;
+  text-align: right;
 }
