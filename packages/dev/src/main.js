@@ -492,6 +492,7 @@ function loadComponents(...components) {
 function createProxy(object) {
   return new Proxy(object, {
     set(target, name, value) {
+      console.log('update', name, value);
       target[name] = value;
       processQueue.add({
         node: object.template,
@@ -527,9 +528,14 @@ class Main extends Component {
   secret = 'shhh';
   show = true;
   style = 'color: teal';
+  counter = { current: 2 };
 
   constructor() {
     super(mainTemplate);
+    setInterval(() => {
+      this.counter = { ...this.counter, current: this.counter.current + 1 };
+      console.log(this.counter);
+    }, 1000);
   }
 
   changeList() {

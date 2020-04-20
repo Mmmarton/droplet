@@ -24,90 +24,143 @@
     </section>
     <section class="content">
       <h1 id="components">Components</h1>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis eget dui in
-      magna malesuada tincidunt id ac ipsum. Cras consectetur sollicitudin nisl,
-      in pretium lorem pharetra nec.
-      <h2>Components</h2>
-      Etiam feugiat pellentesque accumsan. Quisque vestibulum, mauris eu
-      pharetra faucibus, nulla tellus gravida nibh, nec imperdiet sem metus ut
-      erat. Sed eu scelerisque lorem, vel tempus ante. Praesent nec mi nulla.
-      Proin tristique, enim sit amet aliquet porta, est dui commodo leo,
-      facilisis interdum mauris erat quis leo. Aenean et molestie elit. Morbi
-      hendrerit posuere dolor, at finibus ipsum scelerisque at. Proin
-      condimentum feugiat lorem sed luctus. Donec vulputate nunc nec tortor
-      luctus vestibulum. Vivamus nec quam ac velit pretium consequat. Vivamus
-      pharetra ipsum a eros ullamcorper, eu aliquet eros ullamcorper. Aliquam
-      erat volutpat. Morbi fermentum nunc id eros pulvinar, at bibendum velit
-      ultricies.
+      <p>
+        You look at a design, see a dozen sections that look the same but have
+        different data. Would be nice to write the template once and add it
+        dynamically as needed, right? This is where <b>components</b> come into
+        play. <br />The word "component" in our context means a part or a member
+        of the whole project. <i><b>Droplet</b></i> lets you build webpages
+        based on components instead of static templates. Common parts can be
+        reused, and the view is updated dynamically based on the data behind it.
+        The framework handles the connection between the components and the
+        templates defined by you. Updates are handled behind the scenes and you
+        can focus on writing the logic. The general rules of classing HTML and
+        JavaScript sure, still apply. The framework is essentially a .js file
+        that will be probabbly included either directly form your .html files or
+        from one of your custom .js files. Based on this, the bare minimum setup
+        you need is an index.html.
+      </p>
+      <h2>Getting started</h2>
+      At its core a component is a pair of HTML and a JavaScript class. The
+      class handles the HTML as its template. It can also be considered that if
+      the component is an object, then the HTML is what can be seen and the
+      class encompasses the inner behavior. To initialize a component, just
+      declare a class that extends the Droplet
+      <i>Component</i> class and call the <i>super(...)</i> method in the
+      constructor with a template. The template must be valid HTML, which may
+      also contain the properties and tags supported by the framework. Also, it
+      must contain a single root element.
+      <p>
+        In order for the framework to know about your components, you need to
+        tell it which are they. Call the method <i>loadComponents(...)</i> with
+        all your component classes. Finally to kick-off the show, call the
+        method <i>setRoot(...)</i> with your main class (tha one that is at the
+        root of your page). This will initialize the class tree starting from
+        the given component and render it for the first time on screen.
+        <br />
+        A minimal setup would look something like this:
+      </p>
       <pre class="code">
-.description {
-  font-family: 'Raleway';
-  color: #dcc6a5;
-  font-size: 2rem;
+class Main extends Component {
+  constructor() {
+    super('&ltdiv>Main&lt/div>');
+  }
 }
-</pre
+
+loadComponents(Main);
+setRoot(Main);</pre
       >
-      Nunc ut metus sed eros tincidunt maximus. Vestibulum ante ipsum primis in
-      faucibus orci luctus et ultrices posuere cubilia Curae; Proin tincidunt
-      pretium rutrum. Praesent lorem dui, consectetur tristique urna id, dictum
-      dictum purus. Vivamus molestie dolor sed sem scelerisque molestie. In
-      condimentum nulla vel nisi aliquet, quis feugiat nisi volutpat. Mauris
-      quis consequat lacus. In sodales ex sit amet dui feugiat, non molestie
-      ligula gravida. Vivamus quis varius leo. Quisque vehicula convallis
-      scelerisque. In justo lorem, congue eu ex in, imperdiet pulvinar nibh.
-      Donec congue ligula et dui tincidunt aliquet. Quisque dignissim mauris in
-      orci sodales, at finibus dolor ultricies. Proin et auctor leo. Vestibulum
-      sed orci nec leo placerat imperdiet quis vitae lectus. Orci varius natoque
-      penatibus et magnis dis parturient montes, nascetur ridiculus mus. Morbi
-      id fringilla tortor. Nam posuere et ipsum lacinia placerat. Nullam mauris
-      ex, efficitur nec nibh a, ultrices bibendum mi. Morbi leo purus, commodo
-      quis elit ut, sollicitudin semper metus. Vestibulum volutpat maximus nisl,
-      et rutrum nisl pretium vitae. Mauris leo tortor, feugiat at dapibus vitae,
-      semper vel tortor.
+      <p>
+        <b>Note: </b> All the components are rendered in the &ltbody> section of
+        the index.html. This implies that the index page should not contain any
+        html because it will get overwritten.
+      </p>
+      <h2>Nested components</h2>
+      Component nesting is as easy as declaring the template. For each component
+      a tag is generated. The generated tag consists of the component name
+      transformed from camel-case to kebab-case. Ex. If we have a component
+      named <i>BigRedBox</i>, the generated tag will be <i>big-red-box</i>. If
+      we wish to use a component within another, we have to include its tag into
+      the template of the other. It may be worth mentioning, a component can not
+      have its own tag in its template or in any of its child components'
+      template because this would lead to recurion. <br />
+      We can set up a child component within our main component as follows:
+      <pre class="code">
+class Main extends Component {
+  constructor() {
+    super('&ltdiv>Main<b> and &ltbig-red-box/></b>&lt/div>');
+  }
+}
+
+<b>class BigRedBox extends Component {
+  constructor() {
+    super('&ltdiv>BIG BOX&lt/div>');
+  }
+}</b>
+
+loadComponents(Main, <b>BigRedBox</b>);
+setRoot(Main);</pre>
+      Component tags can be either self-closing or used in pair. It is
+      recommended to use them as self-closing, since they can't have any
+      content. Observe that all components need to be loaded but only one can be
+      set as the root component.
       <h1 id="properties">Properties</h1>
-      Fusce at feugiat massa, in gravida mauris. Pellentesque sodales sit amet
-      felis sit amet dapibus. Cras id lorem non ante accumsan hendrerit. Integer
-      at egestas neque, et cursus odio. Donec sollicitudin sit amet augue sed
-      vulputate. Duis mollis, nulla ac sodales sollicitudin, mi tortor viverra
-      ligula, sed varius ligula leo vel arcu. Praesent et dolor sit amet metus
-      tincidunt commodo at et augue. Duis volutpat mi eu nisi condimentum, non
-      auctor est sodales. In nec nibh semper, congue neque sed, ultricies
-      lectus. Vivamus auctor, ligula ac vehicula dictum, enim elit sollicitudin
-      nulla, eu maximus quam dui id urna. Sed ut libero sem. Maecenas pharetra
-      eros a purus facilisis finibus. Integer at quam massa. Proin eget libero
-      velit. Donec porttitor magna in tortor dignissim, id sollicitudin sapien
-      varius. Nullam sit amet erat ut enim vehicula consequat. Ut et ultrices
-      felis. Phasellus nisl tellus, ornare nec suscipit vel, sodales vel turpis.
-      Quisque sed felis quis libero iaculis tincidunt. Nulla vel accumsan erat.
-      Nunc a odio quis urna ullamcorper porta. Maecenas tempor nunc quis nulla
-      dignissim porttitor. Etiam blandit dui id erat porta, sit amet vehicula
-      augue blandit. Praesent ut tellus a est porta hendrerit. Donec faucibus
-      blandit lectus, in facilisis dui lobortis ac. Aliquam interdum risus nec
-      mi hendrerit hendrerit. Aliquam sollicitudin risus eu purus scelerisque,
-      ut consequat mauris lacinia. Proin massa nunc, aliquet in erat nec,
-      sodales pulvinar nulla. Sed consequat iaculis leo at convallis. Etiam mi
-      justo, suscipit a viverra vel, fringilla ut tortor. Praesent sagittis
-      purus lorem, nec commodo felis elementum vitae. Duis vel diam euismod,
-      ornare dolor eu, faucibus ipsum. Vestibulum tristique erat vel urna
-      faucibus eleifend. Pellentesque ut scelerisque libero. Donec justo velit,
-      tempor quis urna a, euismod accumsan ipsum. Proin efficitur ullamcorper
-      mauris quis interdum. Donec ac sem et eros convallis consequat. Aenean nec
-      tincidunt arcu. Aenean ultrices, augue vel sagittis posuere, diam urna
-      congue orci, sit amet molestie orci lectus eu lacus. In scelerisque leo ut
-      enim sagittis sollicitudin. Nulla neque est, vulputate nec leo eu,
-      vehicula sollicitudin dui. Sed in erat facilisis, dapibus justo in,
-      venenatis elit. Fusce porttitor, nunc nec posuere bibendum, leo nisl
-      sodales purus, in varius lectus dolor eget eros. Aliquam commodo volutpat
-      facilisis. Morbi cursus diam nec est viverra, a vehicula diam varius. Duis
-      blandit, ligula vel egestas congue, lorem ante dignissim elit, vitae
-      commodo lorem orci eget ex. Vestibulum vel tellus ut mi molestie
-      fringilla. Aliquam eleifend libero odio, lacinia auctor mi fringilla ut.
-      Etiam nec dictum dui, non ornare nunc. Orci varius natoque penatibus et
-      magnis dis parturient montes, nascetur ridiculus mus. Integer egestas
-      suscipit nunc non scelerisque. Nunc venenatis orci nec rhoncus eleifend.
-      Vestibulum at orci non nunc rhoncus maximus. Aliquam erat volutpat. Proin
-      faucibus, dui sed iaculis aliquam, dui dolor mollis libero, ut feugiat
-      diam quam eu felis. Phasellus condimentum ac tortor at scelerisque.
+      Properties ar the basis of the application structure. Through properties
+      does data get to the user. Through properties does data get to one
+      component to another. And through properties are components able to change
+      their appearance. What the framework does is essentially linking the
+      component properties to the template elements' properties. <br />
+      <h2>Displaying properties in the template</h2>
+      Let's say we have a number we want to display in the main component. We
+      could do this with classical HTML, nothing fancy you say. True. Then let's
+      add a spin to it and make it update every second or so. Still, doable from
+      HTML but let's see how would it look like with Droplet.
+      <pre class="code">
+class Main extends Component {
+  <b>counter = 0;</b>
+
+  constructor() {
+    super('&ltdiv><b>{counter}</b>&lt/div>');
+    <b>setInterval(() => this.counter++, 1000);</b>
+  }
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
+      Nice and easy. Isn't it? 🙂 <br />
+      <p>
+        Properties are linked to the template by the usage of curly braces
+        ('<b>{</b>...<b>}</b>'). The contents of the braces are considered a
+        property of the linked component. Linking is done through their name so
+        they need to have the same name as defined in the component. Updates are
+        handled automatically, there is no need to tellthe components explicitly
+        when there is a change. Properties can also be updated asynchronously as
+        the example shows.
+      </p>
+      Properties can be defined as simple class properties. They can be either
+      perimitives or objects. Primitives can be updated through assignments as
+      the previous example shows. Object however, being kept by reference, need
+      reassignment in order for the template to update. <br />
+      If we have an object property, we can update is as follows:
+      <pre class="code">
+class Main extends Component {
+  <b>counter = {current: 0};</b>
+
+  constructor() {
+    super('&ltdiv><b>{counter.current}</b>&lt/div>');
+    <b>setInterval(() => {
+      this.counter = { 
+        ...this.counter,
+        current: this.counter.current + 1 
+      }, 
+      1000
+    );</b>
+  }
+}
+
+loadComponents(Main);
+setRoot(Main);</pre>
+<h2></h2>
       <h1 id="events">Events</h1>
       Nulla id erat ac tortor commodo gravida eget quis ex. Orci varius natoque
       penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec
