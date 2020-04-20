@@ -3,7 +3,8 @@ import appleTemplate from './apple.html';
 import mainTemplate from './main.html';
 
 class Main extends Component {
-  count = 3;
+  value1 = 3;
+  value2 = 33;
   names = ['Anne', 'Charlie'];
   constructor() {
     super(mainTemplate);

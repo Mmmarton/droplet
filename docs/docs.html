@@ -118,7 +118,10 @@ setRoot(Main);</pre>
       Component tags can be either self-closing or used in pair. It is
       recommended to use them as self-closing, since they can't have any
       content. Observe that all components need to be loaded but only one can be
-      set as the root component.
+      set as the root component. <br />
+      May be worth noting, putting the same component multiple times in the same
+      place results in only the first one being displayed. If the component
+      needs to be repeated a better alternative is to use a <i>*for</i> loop.
       <h1 id="properties">Properties</h1>
       Properties ar the basis of the application structure. Through properties
       does data get to the user. Through properties does data get to one
