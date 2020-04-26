@@ -4,12 +4,16 @@ module.exports = {
     { value: 'fix', name: '            A bugfix' },
     {
       value: 'refactor',
-      name: '  A change in code whithout change in functionality'
+      name: '  A change in code whithout change in functionality',
     },
     {
       value: 'config',
-      name: '     Edit configuration files'
-    }
+      name: '     Edit configuration files',
+    },
+    {
+      value: 'doc',
+      name: '          Add or update documentation',
+    },
   ],
 
   scopes: [],
@@ -24,7 +28,7 @@ module.exports = {
     subject: 'Write a SHORT, IMPERATIVE tense description of the change:\n',
     body:
       'Provide a LONGER description of the change (optional). Use "|" to break new line:\n',
-    confirmCommit: 'Are you sure you want to proceed with the commit above?'
+    confirmCommit: 'Are you sure you want to proceed with the commit above?',
   },
 
   allowCustomScopes: false,
@@ -34,5 +38,5 @@ module.exports = {
 
   maxSubjectLength: 100,
   subjectLimit: 100,
-  breaklineChar: '|'
+  breaklineChar: '|',
 };
